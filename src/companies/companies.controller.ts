@@ -8,6 +8,7 @@ import {
   Delete,
   Req,
   Put,
+  Query,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -26,8 +27,9 @@ export class CompaniesController {
   }
 
   @Get()
-  findAll() {
-    return this.companiesService.findAll();
+  findAll(@Query() query) {
+    const { page } = query;
+    return this.companiesService.findAll(query, page);
   }
 
   @Get(':id')
@@ -45,7 +47,7 @@ export class CompaniesController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.companiesService.remove(+id);
+  remove(@Param('id') id: string, @User() user: IUser) {
+    return this.companiesService.remove(id, user);
   }
 }

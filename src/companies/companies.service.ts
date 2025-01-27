@@ -5,7 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Company, CompanyDocument } from './schemas/company.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/users.interface';
-
+import aqp from 'api-query-params';
 @Injectable()
 export class CompaniesService {
   constructor(
@@ -23,8 +23,33 @@ export class CompaniesService {
     };
   }
 
-  findAll() {
-    return `This action returns all companies`;
+  async findAll(query, page) {
+    const { filter, limit, sort, population } = aqp(query);
+    delete filter.page;
+    delete filter.limit;
+    const offset = (+page - 1) * limit;
+    const defaultLimit = +limit || 10;
+
+    const totalItems = (await this.companyModel.find(filter)).length;
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+
+    const result = await this.companyModel
+      .find(filter)
+      .skip(offset)
+      .limit(defaultLimit)
+      .sort(sort as any)
+      .populate(population)
+      .exec();
+
+    return {
+      meta: {
+        currentPage: page,
+        pageSize: defaultLimit,
+        totalItems,
+        totalPages,
+      },
+      companies: result,
+    };
   }
 
   findOne(id: number) {
@@ -39,7 +64,13 @@ export class CompaniesService {
     return updateCompany;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} company`;
+  remove(id: string, user: IUser) {
+    return this.companyModel.updateOne(
+      { _id: id },
+      {
+        deletedBy: user,
+        isDeleted: true,
+      },
+    );
   }
 }

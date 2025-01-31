@@ -25,8 +25,7 @@ export class UsersController {
 
   @Get()
   findAll(@Query() query) {
-    const { page } = query;
-    return this.usersService.findAll(query, page);
+    return this.usersService.findAll(query);
   }
 
   @Get(':id/products/:prod')

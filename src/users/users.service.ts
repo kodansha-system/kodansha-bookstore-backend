@@ -67,20 +67,35 @@ export class UsersService {
     return user;
   }
 
-  async findAll(query, page) {
-    const { filter, limit, sort } = aqp(query);
+  async findAll(query) {
+    const { filter, sort, population } = aqp(query);
 
-    delete filter.limit;
-    delete filter.page;
+    const offset = (+filter?.current || 1 - 1) * filter?.pageSize;
+    const defaultLimit = +filter?.pageSize || 10;
 
-    const skip = (+page - 1) * +limit;
+    delete filter?.current;
+    delete filter?.pageSize;
 
-    return await this.userModel
+    const totalItems = (await this.userModel.find(filter)).length;
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+
+    const result = await this.userModel
       .find(filter)
-      .skip(skip)
-      .limit(limit)
+      .skip(offset)
+      .limit(defaultLimit)
       .sort(sort as any)
+      .populate(population)
       .exec();
+
+    return {
+      meta: {
+        currentPage: filter?.current || 1,
+        pageSize: defaultLimit,
+        totalItems,
+        totalPages,
+      },
+      users: result,
+    };
   }
 
   findOne(id: string) {

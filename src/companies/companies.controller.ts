@@ -29,8 +29,7 @@ export class CompaniesController {
   @ResponseMessage('Lấy danh sách công ty thành công')
   @Get()
   findAll(@Query() query) {
-    const { page } = query;
-    return this.companiesService.findAll(query, page);
+    return this.companiesService.findAll(query);
   }
 
   @Get(':id')

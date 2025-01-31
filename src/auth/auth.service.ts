@@ -101,4 +101,12 @@ export class AuthService {
       throw new BadRequestException('Token hết hạn');
     }
   };
+
+  logout = async (user, response) => {
+    const userLogout = await this.usersService.findOne(user._id);
+    if (userLogout) {
+      response.clearCookie('refresh_token');
+      await this.usersService.updateUserToken('', user?._id);
+    }
+  };
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { IUser } from 'src/users/users.interface';
@@ -75,5 +75,30 @@ export class AuthService {
       expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRED'),
     });
     return refresh_token;
+  };
+
+  processNewToken = async (refresh_token: string, response: Response) => {
+    try {
+      this.jwtService.verify(refresh_token, {
+        secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
+      });
+
+      const user: any = this.usersService.findUserByToken(refresh_token);
+      console.log({ user });
+
+      if (user) {
+        this.usersService.updateUserToken(refresh_token, user?._id);
+        response.clearCookie('refresh_token');
+        response.cookie('REFRESH_TOKEN', refresh_token, {
+          httpOnly: true,
+          maxAge: ms(this.configService.get<string>('REFRESH_TOKEN_EXPIRED')),
+        });
+      } else {
+        throw new BadRequestException('Token hết hạn');
+      }
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException('Token hết hạn');
+    }
   };
 }

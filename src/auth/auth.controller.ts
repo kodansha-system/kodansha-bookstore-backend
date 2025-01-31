@@ -34,4 +34,13 @@ export class AuthController {
   async register(@Body() body: RegisterUserDto) {
     return this.authService.register(body);
   }
+
+  @Public()
+  @ResponseMessage('Get refresh token')
+  @Get('/refresh')
+  getRefreshToken(@Request() req, @Res({ passthrough: true }) response) {
+    const refresh_token = req.cookies['refresh_token'];
+
+    return this.authService.processNewToken(refresh_token, response);
+  }
 }

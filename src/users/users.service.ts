@@ -133,4 +133,8 @@ export class UsersService {
       },
     );
   };
+
+  findUserByToken = async (refreshToken: string) => {
+    return this.userModel.findOne({ refreshToken });
+  };
 }

@@ -18,7 +18,7 @@ export class AuthService {
   async validateUser(username: string, pass: string): Promise<any> {
     const user = await this.usersService
       .findOneByUsername(username)
-      .select('password');
+      .select('+password');
     if (user) {
       const isValid = this.usersService.isValidPassword(pass, user.password);
       if (isValid) {
@@ -31,6 +31,7 @@ export class AuthService {
 
   async login(user: IUser, response: Response) {
     const { _id, email, name, role } = user?._doc;
+
     const payload = {
       iss: 'from server',
       sub: 'token login',

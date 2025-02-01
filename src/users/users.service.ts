@@ -70,7 +70,7 @@ export class UsersService {
   async findAll(query) {
     const { filter, sort, population } = aqp(query);
 
-    const offset = (+filter?.current || 1 - 1) * filter?.pageSize;
+    const offset = (+filter?.current - 1) * filter?.pageSize;
     const defaultLimit = +filter?.pageSize || 10;
 
     delete filter?.current;

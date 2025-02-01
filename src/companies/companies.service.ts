@@ -26,7 +26,7 @@ export class CompaniesService {
   async findAll(query) {
     const { filter, sort, population } = aqp(query);
 
-    const offset = (+filter?.current || 1 - 1) * filter?.pageSize;
+    const offset = (+filter?.current - 1) * filter?.pageSize;
     const defaultLimit = +filter?.pageSize || 10;
 
     delete filter?.current;
@@ -34,7 +34,7 @@ export class CompaniesService {
 
     const totalItems = (await this.companyModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
-
+    console.log({ filter });
     const result = await this.companyModel
       .find(filter)
       .skip(offset)

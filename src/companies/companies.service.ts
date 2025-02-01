@@ -34,7 +34,7 @@ export class CompaniesService {
 
     const totalItems = (await this.companyModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
-    console.log({ filter });
+
     const result = await this.companyModel
       .find(filter)
       .skip(offset)

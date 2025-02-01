@@ -30,7 +30,7 @@ export class JobsService {
 
     const totalItems = (await this.jobModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
-    console.log({ filter });
+
     const result = await this.jobModel
       .find(filter)
       .skip(offset)

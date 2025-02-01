@@ -84,7 +84,6 @@ export class AuthService {
       });
 
       const user: any = this.usersService.findUserByToken(refresh_token);
-      console.log({ user });
 
       if (user) {
         this.usersService.updateUserToken(refresh_token, user?._id);

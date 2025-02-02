@@ -3,6 +3,8 @@ export class CreateCompanyDto {
   @IsNotEmpty()
   name: string;
 
+  logo: Express.Multer.File;
+
   @IsNotEmpty()
   address: string;
 

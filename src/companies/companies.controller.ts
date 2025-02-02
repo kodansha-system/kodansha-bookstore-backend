@@ -3,27 +3,36 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
-  Req,
   Put,
   Query,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipeBuilder,
+  HttpStatus,
+  ParseFilePipe,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import { Request } from 'express';
 import { ResponseMessage, User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('companies')
 export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
   @Post()
-  create(@Body() createCompanyDto: CreateCompanyDto, @User() user: IUser) {
-    return this.companiesService.create(createCompanyDto, user);
+  @UseInterceptors(FileInterceptor('logo'))
+  create(
+    @Body() createCompanyDto: CreateCompanyDto,
+    @User() user: IUser,
+    @UploadedFile()
+    file: Express.Multer.File,
+  ) {
+    return this.companiesService.create(createCompanyDto, user, file);
   }
 
   @ResponseMessage('Lấy danh sách công ty thành công')
@@ -38,12 +47,19 @@ export class CompaniesController {
   }
 
   @Put(':id')
+  @UseInterceptors(FileInterceptor('logo'))
   update(
     @Param('id') id: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
     @User() user: IUser,
+    @UploadedFile(
+      new ParseFilePipeBuilder().build({
+        fileIsRequired: false,
+      }),
+    )
+    file: Express.Multer.File,
   ) {
-    return this.companiesService.update(id, updateCompanyDto, user);
+    return this.companiesService.update(id, updateCompanyDto, user, file);
   }
 
   @Delete(':id')

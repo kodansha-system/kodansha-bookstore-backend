@@ -9,6 +9,7 @@ import { softDeletePlugin } from 'soft-delete-plugin-mongoose';
 import { CompaniesModule } from './companies/companies.module';
 import { JobsModule } from './jobs/jobs.module';
 import { FilesModule } from './files/files.module';
+import { v2 as cloudinary } from 'cloudinary';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -39,6 +40,20 @@ import { FilesModule } from './files/files.module';
   ],
 
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: 'CLOUDINARY',
+      useFactory: (configService: ConfigService) => {
+        cloudinary.config({
+          cloud_name: configService.get<string>('CLD_CLOUD_NAME'),
+          api_key: configService.get<string>('CLD_API_KEY'),
+          api_secret: configService.get<string>('CLD_API_SECRET'),
+        });
+        return cloudinary;
+      },
+      inject: [ConfigService],
+    },
+  ],
 })
 export class AppModule {}

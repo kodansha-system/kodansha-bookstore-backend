@@ -11,6 +11,7 @@ export class CreateJobDto {
   @IsNotEmpty()
   company_id: string;
 
+  @IsNotEmpty()
   location: string;
 
   @IsNotEmpty()

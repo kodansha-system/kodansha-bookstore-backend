@@ -10,6 +10,7 @@ import { CompaniesModule } from './companies/companies.module';
 import { JobsModule } from './jobs/jobs.module';
 import { FilesModule } from './files/files.module';
 import { v2 as cloudinary } from 'cloudinary';
+import { ResumesModule } from './resumes/resumes.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -37,6 +38,8 @@ import { v2 as cloudinary } from 'cloudinary';
     JobsModule,
 
     FilesModule,
+
+    ResumesModule,
   ],
 
   controllers: [AppController],

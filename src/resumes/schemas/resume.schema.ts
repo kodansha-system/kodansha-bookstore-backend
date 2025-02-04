@@ -1,5 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
+import { Company } from 'src/companies/schemas/company.schema';
+import { Job } from 'src/jobs/schemas/job.schema';
+import { User } from 'src/users/schemas/user.schema';
 
 export type ResumeDocument = HydratedDocument<Resume>;
 
@@ -8,10 +11,10 @@ export class Resume {
   @Prop()
   email: string;
 
-  @Prop()
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
   user_id: mongoose.Schema.Types.ObjectId;
 
-  @Prop()
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Company.name })
   company_id: mongoose.Schema.Types.ObjectId;
 
   @Prop()
@@ -20,7 +23,7 @@ export class Resume {
   @Prop()
   status: string; // PENDING-REVIEWING-APPROVED-REJECTED
 
-  @Prop()
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Job.name })
   job_id: mongoose.Schema.Types.ObjectId;
 
   @Prop({ type: mongoose.Schema.Types.Array })

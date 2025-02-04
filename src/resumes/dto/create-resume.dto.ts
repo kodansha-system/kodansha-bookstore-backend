@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsMongoId, IsNotEmpty } from 'class-validator';
 import mongoose from 'mongoose';
 
 export class CreateResumeDto {
@@ -26,8 +26,10 @@ export class CreateResumeCVDto {
   url: string;
 
   @IsNotEmpty()
+  @IsMongoId({ message: 'Id không đúng định dạng' })
   company_id: mongoose.Schema.Types.ObjectId;
 
   @IsNotEmpty()
+  @IsMongoId({ message: 'Id không đúng định dạng' })
   job_id: mongoose.Schema.Types.ObjectId;
 }

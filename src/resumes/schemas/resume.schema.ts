@@ -6,7 +6,7 @@ import { User } from 'src/users/schemas/user.schema';
 
 export type ResumeDocument = HydratedDocument<Resume>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Resume {
   @Prop()
   email: string;

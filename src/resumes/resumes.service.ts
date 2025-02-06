@@ -99,4 +99,14 @@ export class ResumesService {
       },
     );
   }
+
+  async getResumesByUserId(id: string) {
+    return await this.resumeModel
+      .find({ user_id: id })
+      .populate([
+        { path: 'job_id', select: { name: 1 } },
+        { path: 'company_id', select: { name: 1 } },
+      ])
+      .sort('-createdAt');
+  }
 }

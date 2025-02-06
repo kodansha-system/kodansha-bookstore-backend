@@ -45,4 +45,9 @@ export class ResumesController {
   remove(@Param('id') id: string, @User() user) {
     return this.resumesService.remove(id, user);
   }
+
+  @Get('/users/:userId')
+  async getResumesByUser(@Param('userId') userId: string) {
+    return this.resumesService.getResumesByUserId(userId);
+  }
 }

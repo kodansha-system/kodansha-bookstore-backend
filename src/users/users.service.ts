@@ -68,7 +68,7 @@ export class UsersService {
   }
 
   async findAll(query) {
-    const { filter, sort, population } = aqp(query);
+    const { filter, sort, population, projection } = aqp(query);
 
     const offset = (+filter?.current - 1) * filter?.pageSize;
     const defaultLimit = +filter?.pageSize || 10;
@@ -85,6 +85,7 @@ export class UsersService {
       .limit(defaultLimit)
       .sort(sort as any)
       .populate(population)
+      .projection(projection)
       .exec();
 
     return {
@@ -99,13 +100,17 @@ export class UsersService {
   }
 
   findOne(id: string) {
-    return this.userModel.findById(id);
+    return this.userModel
+      .findById(id)
+      .populate({ path: 'role', select: { name: 1, permissions: 1 } });
   }
 
   findOneByUsername(username: string) {
-    return this.userModel.findOne({
-      email: username,
-    });
+    return this.userModel
+      .findOne({
+        email: username,
+      })
+      .populate({ path: 'role', select: { name: 1, permissions: 1 } });
   }
 
   async update(id: string, updateUserDto: UpdateUserDto, updatedBy: IUser) {
@@ -150,6 +155,8 @@ export class UsersService {
   };
 
   findUserByToken = async (refreshToken: string) => {
-    return this.userModel.findOne({ refreshToken });
+    return this.userModel
+      .findOne({ refreshToken })
+      .populate({ path: 'role', select: { name: 1, permissions: 1 } });
   };
 }

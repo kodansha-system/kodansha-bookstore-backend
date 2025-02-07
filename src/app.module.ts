@@ -13,6 +13,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { ResumesModule } from './resumes/resumes.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { RolesModule } from './roles/roles.module';
+import { DatabasesModule } from './databases/databases.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -46,6 +47,8 @@ import { RolesModule } from './roles/roles.module';
     PermissionsModule,
 
     RolesModule,
+
+    DatabasesModule,
   ],
 
   controllers: [AppController],

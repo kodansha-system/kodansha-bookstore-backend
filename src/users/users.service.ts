@@ -85,7 +85,7 @@ export class UsersService {
       .limit(defaultLimit)
       .sort(sort as any)
       .populate(population)
-      .projection(projection)
+      // .projection(projection)
       .exec();
 
     return {
@@ -100,17 +100,24 @@ export class UsersService {
   }
 
   findOne(id: string) {
-    return this.userModel
-      .findById(id)
-      .populate({ path: 'role', select: { name: 1, permissions: 1 } });
+    return this.userModel.findById(id).populate({
+      path: 'role',
+      select: { name: 1, permissions: 1 },
+      populate: { path: 'permissions', select: { name: 1 } },
+    });
   }
 
-  findOneByUsername(username: string) {
-    return this.userModel
+  async findOneByUsername(username: string) {
+    return await this.userModel
       .findOne({
         email: username,
       })
-      .populate({ path: 'role', select: { name: 1, permissions: 1 } });
+      .populate({
+        path: 'role',
+        select: { name: 1, permissions: 1 },
+        populate: { path: 'permissions', select: { name: 1 } },
+      })
+      .exec();
   }
 
   async update(id: string, updateUserDto: UpdateUserDto, updatedBy: IUser) {
@@ -118,18 +125,25 @@ export class UsersService {
     if (updateUserDto?.password) {
       const { password } = updateUserDto;
       const hashPassword = this.getHashPassword(password);
-      const updatedUser = await this.userModel.updateOne(user, {
-        ...updateUserDto,
-        password: hashPassword,
-        updatedBy,
-      });
+      const updatedUser = await this.userModel.updateOne(
+        { _id: user?._doc?._id },
+        {
+          ...updateUserDto,
+          password: hashPassword,
+          updatedBy,
+        },
+      );
+      return updatedUser;
+    } else {
+      const updatedUser = await this.userModel.updateOne(
+        { _id: user?._doc?._id },
+        {
+          ...updateUserDto,
+          updatedBy,
+        },
+      );
       return updatedUser;
     }
-    const updatedUser = await this.userModel.updateOne(user, {
-      ...updateUserDto,
-      updatedBy,
-    });
-    return updatedUser;
   }
 
   async remove(id: string, deletedBy: IUser) {

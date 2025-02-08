@@ -60,7 +60,7 @@ export class RolesService {
   async findOne(id: string) {
     return await this.roleModel.findById(id).populate({
       path: 'permissions',
-      select: { name: 1, module: 1, api_path: 1 },
+      select: { name: 1, module: 1, api_path: 1, method: 1 },
     });
   }
 

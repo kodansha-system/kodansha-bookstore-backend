@@ -31,9 +31,25 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     context: ExecutionContext,
     status?: any,
   ): TUser {
-    if (err || !user) {
-      throw err || new UnauthorizedException('Token không hợp lệ');
+    try {
+      const request = context.switchToHttp().getRequest();
+      const currPath = request?.route?.path;
+      const currMethod = request?.method;
+      const hasPermission = user?.permissions?.find(({ api_path, method }) => {
+        return api_path === currPath && method === currMethod;
+      });
+
+      if (!hasPermission) {
+        throw err || new UnauthorizedException('Không có quyền vào route này');
+      }
+
+      if (err || !user) {
+        throw err || new UnauthorizedException('Token không hợp lệ');
+      }
+
+      return user;
+    } catch (err) {
+      console.log(err);
     }
-    return user;
   }
 }

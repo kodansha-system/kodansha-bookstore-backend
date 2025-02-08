@@ -10,10 +10,11 @@ export interface IUserBody {
     _id: string;
     name: string;
   };
-  permissions?: {
+  permissions: {
     _id: string;
     name: string;
     api_path: string;
+    method: string;
     module: string;
   }[];
 }

@@ -5,7 +5,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ab415f4328bd3153ee211',
     name: 'Get Company with paginate',
-    apiPath: '/api/v1/companies',
+    api_path: '/api/v1/companies',
     method: 'GET',
     module: 'COMPANIES',
     createdBy: {
@@ -25,7 +25,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ab436f4328bd3153ee216',
     name: 'Create Company',
-    apiPath: '/api/v1/companies',
+    api_path: '/api/v1/companies',
     method: 'POST',
     module: 'COMPANIES',
     createdBy: {
@@ -41,7 +41,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ab4d5f4328bd3153ee21b',
     name: 'Update Company',
-    apiPath: '/api/v1/companies/:id',
+    api_path: '/api/v1/companies/:id',
     method: 'PATCH',
     module: 'COMPANIES',
     createdBy: {
@@ -57,7 +57,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ab4ebf4328bd3153ee220',
     name: 'Delete Company',
-    apiPath: '/api/v1/companies/:id',
+    api_path: '/api/v1/companies/:id',
     method: 'DELETE',
     module: 'COMPANIES',
     createdBy: {
@@ -73,7 +73,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ab5a8072f2a2ef910638d',
     name: 'Get Company by id',
-    apiPath: '/api/v1/companies/:id',
+    api_path: '/api/v1/companies/:id',
     method: 'GET',
     module: 'COMPANIES',
     createdBy: {
@@ -89,7 +89,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ab6d3fa16b294212e4033',
     name: 'Create User',
-    apiPath: '/api/v1/users',
+    api_path: '/api/v1/users',
     method: 'POST',
     module: 'USERS',
     createdBy: {
@@ -105,7 +105,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ab6e7fa16b294212e4038',
     name: 'Get User by Id',
-    apiPath: '/api/v1/users/:id',
+    api_path: '/api/v1/users/:id',
     method: 'GET',
     module: 'USERS',
     createdBy: {
@@ -121,7 +121,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ab6fdfa16b294212e403d',
     name: 'Get User with paginate',
-    apiPath: '/api/v1/users',
+    api_path: '/api/v1/users',
     method: 'GET',
     module: 'USERS',
     createdBy: {
@@ -137,7 +137,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ab719fa16b294212e4042',
     name: 'Update User',
-    apiPath: '/api/v1/users/:id',
+    api_path: '/api/v1/users/:id',
     method: 'PATCH',
     module: 'USERS',
     createdBy: {
@@ -153,7 +153,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ab728fa16b294212e4047',
     name: 'Delete User',
-    apiPath: '/api/v1/users/:id',
+    api_path: '/api/v1/users/:id',
     method: 'DELETE',
     module: 'USERS',
     createdBy: {
@@ -169,7 +169,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ab750fa16b294212e404c',
     name: 'Upload Single File',
-    apiPath: '/api/v1/files/upload',
+    api_path: '/api/v1/files/upload',
     method: 'POST',
     module: 'FILES',
     createdBy: {
@@ -185,7 +185,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad488dafdb9754f40b846',
     name: 'Create a Job',
-    apiPath: '/api/v1/jobs',
+    api_path: '/api/v1/jobs',
     method: 'POST',
     module: 'JOBS',
     createdBy: {
@@ -201,7 +201,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad499dafdb9754f40b84b',
     name: 'Get a job by id',
-    apiPath: '/api/v1/jobs/:id',
+    api_path: '/api/v1/jobs/:id',
     method: 'GET',
     module: 'JOBS',
     createdBy: {
@@ -217,7 +217,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad4a6dafdb9754f40b850',
     name: 'Update a Job',
-    apiPath: '/api/v1/jobs/:id',
+    api_path: '/api/v1/jobs/:id',
     method: 'PATCH',
     module: 'JOBS',
     createdBy: {
@@ -233,7 +233,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad4ccdafdb9754f40b859',
     name: 'Get Job with paginate',
-    apiPath: '/api/v1/jobs',
+    api_path: '/api/v1/jobs',
     method: 'GET',
     module: 'JOBS',
     createdBy: {
@@ -249,7 +249,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad4d9dafdb9754f40b85e',
     name: 'Delete a Job',
-    apiPath: '/api/v1/jobs/:id',
+    api_path: '/api/v1/jobs/:id',
     method: 'DELETE',
     module: 'JOBS',
     createdBy: {
@@ -265,7 +265,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad4fedafdb9754f40b863',
     name: 'Create a Resume',
-    apiPath: '/api/v1/resumes',
+    api_path: '/api/v1/resumes',
     method: 'POST',
     module: 'RESUMES',
     createdBy: {
@@ -281,7 +281,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad511dafdb9754f40b868',
     name: 'Fetch resume with paginate',
-    apiPath: '/api/v1/resumes',
+    api_path: '/api/v1/resumes',
     method: 'GET',
     module: 'RESUMES',
     createdBy: {
@@ -297,7 +297,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad522dafdb9754f40b86d',
     name: 'Get resume by id',
-    apiPath: '/api/v1/resumes/:id',
+    api_path: '/api/v1/resumes/:id',
     method: 'GET',
     module: 'RESUMES',
     createdBy: {
@@ -313,7 +313,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad53bdafdb9754f40b872',
     name: 'Delete a resume',
-    apiPath: '/api/v1/resumes/:id',
+    api_path: '/api/v1/resumes/:id',
     method: 'DELETE',
     module: 'RESUMES',
     createdBy: {
@@ -329,7 +329,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad555dafdb9754f40b877',
     name: 'Update resume status',
-    apiPath: '/api/v1/resumes/:id',
+    api_path: '/api/v1/resumes/:id',
     method: 'PATCH',
     module: 'RESUMES',
     createdBy: {
@@ -345,7 +345,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad56ddafdb9754f40b87c',
     name: 'Fetch resumes by user',
-    apiPath: '/api/v1/resumes/by-user',
+    api_path: '/api/v1/resumes/by-user',
     method: 'POST',
     module: 'RESUMES',
     createdBy: {
@@ -361,7 +361,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad59adafdb9754f40b881',
     name: 'Create a permission',
-    apiPath: '/api/v1/permissions',
+    api_path: '/api/v1/permissions',
     method: 'POST',
     module: 'PERMISSIONS',
     createdBy: {
@@ -377,7 +377,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad5aedafdb9754f40b886',
     name: 'Fetch Permission with paginate',
-    apiPath: '/api/v1/permissions',
+    api_path: '/api/v1/permissions',
     method: 'GET',
     module: 'PERMISSIONS',
     createdBy: {
@@ -393,7 +393,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad5c5dafdb9754f40b88b',
     name: 'Fetch permission by id',
-    apiPath: '/api/v1/permissions/:id',
+    api_path: '/api/v1/permissions/:id',
     method: 'GET',
     module: 'PERMISSIONS',
     createdBy: {
@@ -409,7 +409,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad5d4dafdb9754f40b890',
     name: 'Update a permission',
-    apiPath: '/api/v1/permissions/:id',
+    api_path: '/api/v1/permissions/:id',
     method: 'PATCH',
     module: 'PERMISSIONS',
     createdBy: {
@@ -425,7 +425,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad5ebdafdb9754f40b895',
     name: 'Delete a permission',
-    apiPath: '/api/v1/permissions/:id',
+    api_path: '/api/v1/permissions/:id',
     method: 'DELETE',
     module: 'PERMISSIONS',
     createdBy: {
@@ -441,7 +441,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad613dafdb9754f40b89a',
     name: 'Create Role',
-    apiPath: '/api/v1/roles',
+    api_path: '/api/v1/roles',
     method: 'POST',
     module: 'ROLES',
     createdBy: {
@@ -457,7 +457,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad622dafdb9754f40b89f',
     name: 'Fetch roles with paginate',
-    apiPath: '/api/v1/roles',
+    api_path: '/api/v1/roles',
     method: 'GET',
     module: 'ROLES',
     createdBy: {
@@ -473,7 +473,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad630dafdb9754f40b8a6',
     name: 'Fetch role by id',
-    apiPath: '/api/v1/roles/:id',
+    api_path: '/api/v1/roles/:id',
     method: 'GET',
     module: 'ROLES',
     createdBy: {
@@ -489,7 +489,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad640dafdb9754f40b8ab',
     name: 'Update Role',
-    apiPath: '/api/v1/roles/:id',
+    api_path: '/api/v1/roles/:id',
     method: 'PATCH',
     module: 'ROLES',
     createdBy: {
@@ -505,7 +505,7 @@ export const INIT_PERMISSIONS = [
   {
     _id: '648ad650dafdb9754f40b8b0',
     name: 'Delete a Role',
-    apiPath: '/api/v1/roles/:id',
+    api_path: '/api/v1/roles/:id',
     method: 'DELETE',
     module: 'ROLES',
     createdBy: {

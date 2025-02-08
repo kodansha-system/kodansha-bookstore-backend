@@ -2,33 +2,37 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { IUser } from 'src/users/users.interface';
-import { CreateUserDto, RegisterUserDto } from 'src/users/dto/create-user.dto';
+import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import ms from 'ms';
+import { RolesService } from 'src/roles/roles.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private rolesService: RolesService,
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.usersService.findOneByUsername(username);
+    const user = (await this.usersService.findOneByUsername(username)) as any;
     if (user) {
       const isValid = this.usersService.isValidPassword(pass, user.password);
       if (isValid) {
+        const temp = await this.rolesService.findOne(user?.role?._id);
         const { password, ...result } = user;
-        return result;
+        console.log(temp, 'check temp');
+        return { ...result, permissions: temp?.permissions };
       }
     }
     return null;
   }
 
-  async login(user: IUser, response: Response) {
-    const { _id, email, name, role } = user?._doc;
+  async login(user: any, response: Response) {
+    const { _id, email, name, role, permissions } = user;
 
     const payload = {
       iss: 'from server',
@@ -55,6 +59,7 @@ export class AuthService {
         email,
         name,
         role,
+        permissions,
       },
     };
   }

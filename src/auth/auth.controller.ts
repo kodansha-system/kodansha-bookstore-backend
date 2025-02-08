@@ -11,10 +11,14 @@ import { AuthService } from './auth.service';
 import { Public, ResponseMessage } from 'src/decorator/customize';
 import { LocalAuthGuard } from './local-auth.guard';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
+import { RolesService } from 'src/roles/roles.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private roleService: RolesService,
+  ) {}
 
   @Public()
   @UseGuards(LocalAuthGuard)
@@ -24,8 +28,9 @@ export class AuthController {
   }
 
   @Get('/profile')
-  getProfile(@Request() req) {
-    return req.user;
+  async getProfile(@Request() req) {
+    const temp = await this.roleService.findOne(req?.user?.role?._id);
+    return { ...req.user, permissions: temp?.permissions };
   }
 
   @ResponseMessage('Register a user')

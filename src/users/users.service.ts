@@ -8,12 +8,16 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { Company, CompanyDocument } from 'src/companies/schemas/company.schema';
 import { IUser } from './users.interface';
 import aqp from 'api-query-params';
+import { USER_ROLE } from 'src/databases/sample';
+import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument>,
     @InjectModel(Company.name)
     private companyModel: SoftDeleteModel<CompanyDocument>,
+    @InjectModel(Role.name)
+    private roleModel: SoftDeleteModel<RoleDocument>,
   ) {}
 
   getHashPassword = (password: string) => {
@@ -58,11 +62,13 @@ export class UsersService {
       throw new BadRequestException('Email đã tồn tại');
     }
 
+    const defaultRole = await this.roleModel.findOne({ name: USER_ROLE });
+
     const hashPassword = this.getHashPassword(password);
     const user = await this.userModel.create({
       ...createUserDto,
       password: hashPassword,
-      role: 'USER',
+      role: defaultRole?._id,
     });
     return user;
   }
@@ -114,8 +120,7 @@ export class UsersService {
       })
       .populate({
         path: 'role',
-        select: { name: 1, permissions: 1 },
-        populate: { path: 'permissions', select: { name: 1 } },
+        select: { name: 1 },
       })
       .exec();
   }
@@ -171,6 +176,6 @@ export class UsersService {
   findUserByToken = async (refreshToken: string) => {
     return this.userModel
       .findOne({ refreshToken })
-      .populate({ path: 'role', select: { name: 1, permissions: 1 } });
+      .populate({ path: 'role', select: { name: 1 } });
   };
 }

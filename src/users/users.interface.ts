@@ -6,5 +6,14 @@ export interface IUserBody {
   _id: string;
   name: string;
   email: string;
-  role: string;
+  role: {
+    _id: string;
+    name: string;
+  };
+  permissions?: {
+    _id: string;
+    name: string;
+    api_path: string;
+    module: string;
+  }[];
 }

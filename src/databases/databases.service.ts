@@ -68,13 +68,17 @@ export class DatabasesService implements OnModuleInit {
             {
               name: 'Admin',
               email: 'admin@gmail.com',
-              password: this.configService.get('INIT_PASSWORD'),
+              password: this.userService.getHashPassword(
+                this.configService.get('INIT_PASSWORD'),
+              ),
               role: adminRole?._id,
             },
             {
               name: 'User',
               email: 'user@gmail.com',
-              password: this.configService.get('INIT_PASSWORD'),
+              password: this.userService.getHashPassword(
+                this.configService.get('INIT_PASSWORD'),
+              ),
               role: userRole?._id,
             },
           ]);

@@ -24,7 +24,6 @@ export class AuthService {
       if (isValid) {
         const temp = await this.rolesService.findOne(user?.role?._id);
         const { password, ...result } = user;
-        console.log(temp, 'check temp');
         return { ...result, permissions: temp?.permissions };
       }
     }
@@ -75,7 +74,7 @@ export class AuthService {
   createRefreshToken = (payload) => {
     const refresh_token = this.jwtService.sign(payload, {
       secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
-      expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRED'),
+      expiresIn: ms(this.configService.get<string>('REFRESH_TOKEN_EXPIRED')),
     });
     return refresh_token;
   };
@@ -86,15 +85,36 @@ export class AuthService {
         secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
       });
 
-      const user: any = this.usersService.findUserByToken(refresh_token);
+      const user: any = await this.usersService.findUserByToken(refresh_token);
 
       if (user) {
         this.usersService.updateUserToken(refresh_token, user?._id);
         response.clearCookie('refresh_token');
-        response.cookie('REFRESH_TOKEN', refresh_token, {
+        response.cookie('refresh_token', refresh_token, {
           httpOnly: true,
           maxAge: ms(this.configService.get<string>('REFRESH_TOKEN_EXPIRED')),
         });
+        const { _id, email, name, role, permissions } = user;
+
+        const payload = {
+          iss: 'from server',
+          sub: 'token login',
+          _id,
+          email,
+          name,
+          role,
+        };
+
+        return {
+          access_token: this.jwtService.sign(payload),
+          user: {
+            _id,
+            email,
+            name,
+            role,
+            permissions,
+          },
+        };
       } else {
         throw new BadRequestException('Token hết hạn');
       }

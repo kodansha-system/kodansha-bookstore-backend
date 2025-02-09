@@ -14,3 +14,6 @@ export const User = createParamDecorator(
 );
 export const ResponseMessage = (message: string) =>
   SetMetadata('response_message', message);
+export const IS_SKIP_CHECK_PERMISSION = 'isSkipCheckPermission';
+export const SkipCheckPermission = () =>
+  SetMetadata(IS_SKIP_CHECK_PERMISSION, true);

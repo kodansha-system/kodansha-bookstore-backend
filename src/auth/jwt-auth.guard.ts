@@ -5,7 +5,10 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
-import { IS_PUBLIC_KEY } from 'src/decorator/customize';
+import {
+  IS_PUBLIC_KEY,
+  IS_SKIP_CHECK_PERMISSION,
+} from 'src/decorator/customize';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -32,12 +35,25 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     status?: any,
   ): TUser {
     try {
+      const skipCheckPermission = this.reflector.getAllAndOverride<boolean>(
+        IS_SKIP_CHECK_PERMISSION,
+        [context.getHandler(), context.getClass()],
+      );
+      if (skipCheckPermission) {
+        return user;
+      }
       const request = context.switchToHttp().getRequest();
       const currPath = request?.route?.path;
       const currMethod = request?.method;
-      const hasPermission = user?.permissions?.find(({ api_path, method }) => {
+
+      let hasPermission = user?.permissions?.find(({ api_path, method }) => {
         return api_path === currPath && method === currMethod;
       });
+
+      if (currPath.startWith('/api/v1/auth')) {
+        hasPermission = true;
+      }
+
       if (!hasPermission) {
         throw err || new UnauthorizedException('Không có quyền vào route này');
       }

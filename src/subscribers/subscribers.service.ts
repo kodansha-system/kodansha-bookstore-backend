@@ -4,7 +4,7 @@ import { UpdateSubscriberDto } from './dto/update-subscriber.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Subscriber, SubscriberDocument } from './schemas/subscribers.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { IUser } from 'src/users/users.interface';
+import { IUser, IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 @Injectable()
 export class SubscribersService {
@@ -60,14 +60,11 @@ export class SubscribersService {
     return await this.subscriberModel.findById(id);
   }
 
-  async update(
-    id: string,
-    updateSubscriberDto: UpdateSubscriberDto,
-    user: IUser,
-  ) {
+  async update(updateSubscriberDto: UpdateSubscriberDto, user: IUserBody) {
     const updateSubscriber = await this.subscriberModel.updateOne(
-      { _id: id },
+      { email: user?.email },
       { ...updateSubscriberDto, updatedBy: user },
+      { upsert: true },
     );
 
     return updateSubscriber;
@@ -81,5 +78,10 @@ export class SubscribersService {
         isDeleted: true,
       },
     );
+  }
+
+  async getSkills(user: IUserBody) {
+    const { email } = user;
+    return await this.subscriberModel.findOne({ email }, { skills: 1 });
   }
 }

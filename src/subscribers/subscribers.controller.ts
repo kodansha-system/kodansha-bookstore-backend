@@ -11,8 +11,13 @@ import {
 import { SubscribersService } from './subscribers.service';
 import { CreateSubscriberDto } from './dto/create-subscriber.dto';
 import { UpdateSubscriberDto } from './dto/update-subscriber.dto';
-import { Public, ResponseMessage, User } from 'src/decorator/customize';
-import { IUser } from 'src/users/users.interface';
+import {
+  Public,
+  ResponseMessage,
+  SkipCheckPermission,
+  User,
+} from 'src/decorator/customize';
+import { IUser, IUserBody } from 'src/users/users.interface';
 
 @Controller('subscribers')
 export class SubscribersController {
@@ -39,18 +44,24 @@ export class SubscribersController {
     return this.subscribersService.findOne(id);
   }
 
-  @Put(':id')
+  @Put()
+  @SkipCheckPermission()
   update(
-    @Param('id') id: string,
     @Body() updateSubscriberDto: UpdateSubscriberDto,
-    @User() user: IUser,
+    @User() user: IUserBody,
   ) {
-    console.log(updateSubscriberDto);
-    return this.subscribersService.update(id, updateSubscriberDto, user);
+    return this.subscribersService.update(updateSubscriberDto, user);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @User() user: IUser) {
     return this.subscribersService.remove(id, user);
+  }
+
+  @Get('skills')
+  @ResponseMessage('Lấy skill của user')
+  @SkipCheckPermission()
+  getUserSkills(@User() user: IUserBody) {
+    return this.subscribersService.getSkills(user);
   }
 }

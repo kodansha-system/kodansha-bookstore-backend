@@ -19,16 +19,14 @@ import { MailService } from './mail.service';
             pass: configService.get<string>('EMAIL_PASSWORD'),
           },
         },
-        // defaults: {
-        //   from: configService.get<string>('SENDER_MAIL'),
-        // },
-        // template: {
-        //   dir: __dirname + '/templates',
-        //   adapter: new HandlebarsAdapter(),
-        //   options: {
-        //     strict: true,
-        //   },
-        // },
+        template: {
+          dir: __dirname + '/templates',
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+        preview: true,
       }),
       inject: [ConfigService],
     }),

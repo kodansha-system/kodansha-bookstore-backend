@@ -6,7 +6,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 export class MailController {
   constructor(private readonly mailService: MailerService) {}
 
-  @Get('/')
+  @Get()
   @Public()
   @ResponseMessage('Test mail')
   async handleTestEmail() {
@@ -14,7 +14,7 @@ export class MailController {
       to: 'luongminhanh.thcstm@gmail.com',
       from: '"IT VIP pro" <abc@gmail.com>',
       subject: 'Just a test email',
-      html: '<b>Hello</b>',
+      template: 'new-job',
     });
   }
 }

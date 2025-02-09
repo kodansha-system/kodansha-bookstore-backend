@@ -16,6 +16,7 @@ import { RolesModule } from './roles/roles.module';
 import { DatabasesModule } from './databases/databases.module';
 import { SubscribersModule } from './subscribers/subscribers.module';
 import { MailModule } from './mail/mail.module';
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -55,6 +56,8 @@ import { MailModule } from './mail/mail.module';
     SubscribersModule,
 
     MailModule,
+
+    ScheduleModule.forRoot(),
   ],
 
   controllers: [AppController],

@@ -38,7 +38,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       const hasPermission = user?.permissions?.find(({ api_path, method }) => {
         return api_path === currPath && method === currMethod;
       });
-
       if (!hasPermission) {
         throw err || new UnauthorizedException('Không có quyền vào route này');
       }
@@ -50,6 +49,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       return user;
     } catch (err) {
       console.log(err);
+      throw err || new UnauthorizedException('Không có quyền vào route này');
     }
   }
 }

@@ -1,27 +1,26 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateRoleDto } from './dto/create-role.dto';
-import { UpdateRoleDto } from './dto/update-role.dto';
+import { Injectable } from '@nestjs/common';
+import { CreateSubscriberDto } from './dto/create-subscriber.dto';
+import { UpdateSubscriberDto } from './dto/update-subscriber.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Role, RoleDocument } from './schemas/role.schema';
+import { Subscriber, SubscriberDocument } from './schemas/subscribers.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 @Injectable()
-export class RolesService {
+export class SubscribersService {
   constructor(
-    @InjectModel(Role.name)
-    private roleModel: SoftDeleteModel<RoleDocument>,
+    @InjectModel(Subscriber.name)
+    private subscriberModel: SoftDeleteModel<SubscriberDocument>,
   ) {}
 
-  async create(createRoleDto: CreateRoleDto, user: IUser) {
-    const role = await this.roleModel.create({
-      is_active: false,
-      ...createRoleDto,
+  async create(createSubscriberDto: CreateSubscriberDto, user: IUser) {
+    const subscriber = await this.subscriberModel.create({
+      ...createSubscriberDto,
       createdBy: user,
     });
 
     return {
-      role,
+      subscriber,
     };
   }
 
@@ -34,10 +33,10 @@ export class RolesService {
     delete filter?.current;
     delete filter?.pageSize;
 
-    const totalItems = (await this.roleModel.find(filter)).length;
+    const totalItems = (await this.subscriberModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    const result = await this.roleModel
+    const result = await this.subscriberModel
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
@@ -53,28 +52,29 @@ export class RolesService {
         totalItems,
         totalPages,
       },
-      roles: result,
+      subscribers: result,
     };
   }
 
   async findOne(id: string) {
-    return await this.roleModel.findById(id).populate({
-      path: 'permissions',
-      select: { name: 1, module: 1, api_path: 1, method: 1 },
-    });
+    return await this.subscriberModel.findById(id);
   }
 
-  async update(id: string, updateRoleDto: UpdateRoleDto, user: IUser) {
-    const updateRole = await this.roleModel.updateOne(
+  async update(
+    id: string,
+    updateSubscriberDto: UpdateSubscriberDto,
+    user: IUser,
+  ) {
+    const updateSubscriber = await this.subscriberModel.updateOne(
       { _id: id },
-      { ...updateRoleDto, updatedBy: user },
+      { ...updateSubscriberDto, updatedBy: user },
     );
 
-    return updateRole;
+    return updateSubscriber;
   }
 
   remove(id: string, user: IUser) {
-    return this.roleModel.updateOne(
+    return this.subscriberModel.updateOne(
       { _id: id },
       {
         deletedBy: user,

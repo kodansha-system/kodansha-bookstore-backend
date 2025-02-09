@@ -2,8 +2,6 @@
 /dist
 /node_modules
 package-lock.json
-.env
-env
 # Logs
 logs
 *.log
@@ -36,6 +34,4 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
-.env
-
-/.env
+.env.example

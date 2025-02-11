@@ -12,7 +12,11 @@ import { Public, ResponseMessage } from 'src/decorator/customize';
 import { LocalAuthGuard } from './local-auth.guard';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { RolesService } from 'src/roles/roles.service';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import { ApiTags, ApiOkResponse, ApiBody } from '@nestjs/swagger';
+import { UserLoginDto } from './dto/login.dto';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -22,6 +26,9 @@ export class AuthController {
 
   @Public()
   @UseGuards(LocalAuthGuard)
+  @UseGuards(ThrottlerGuard)
+  @ApiBody({ type: UserLoginDto })
+  @ApiOkResponse({ description: 'result Token' })
   @Post('/login')
   async login(@Request() req, @Res({ passthrough: true }) response) {
     return this.authService.login(req.user, response);

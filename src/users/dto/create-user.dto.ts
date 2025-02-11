@@ -46,6 +46,7 @@ export class CreateUserDto {
   // @ValidateNested()
   // @Type(() => Company)
   @IsNotEmpty({ message: 'Company không được để trống' })
+  @IsMongoId()
   company_id: string;
 }
 

@@ -1,5 +1,5 @@
 import { IsNotEmpty } from 'class-validator';
-import { ObjectId } from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 
 export class CreateRoleDto {
   @IsNotEmpty()
@@ -9,5 +9,5 @@ export class CreateRoleDto {
 
   is_active: string;
 
-  permissions: [{ type: ObjectId }];
+  permissions: [{ type: mongoose.Schema.Types.ObjectId }];
 }

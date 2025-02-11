@@ -17,6 +17,7 @@ import { DatabasesModule } from './databases/databases.module';
 import { SubscribersModule } from './subscribers/subscribers.module';
 import { MailModule } from './mail/mail.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule } from '@nestjs/throttler';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -58,6 +59,11 @@ import { ScheduleModule } from '@nestjs/schedule';
     MailModule,
 
     ScheduleModule.forRoot(),
+
+    ThrottlerModule.forRoot({
+      ttl: 60,
+      limit: 10,
+    }),
   ],
 
   controllers: [AppController],

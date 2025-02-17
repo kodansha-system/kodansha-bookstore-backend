@@ -9,11 +9,15 @@ import { JwtStrategy } from './passport/jwt.strategy';
 import ms from 'ms';
 import { AuthController } from './auth.controller';
 import { RolesModule } from 'src/roles/roles.module';
+import { FacebookStrategy } from './passport/facebook.strategy';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
+import { User, UserSchema } from 'src/users/schemas/user.schema';
 @Module({
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, FacebookStrategy],
   imports: [
-    RolesModule,
     UsersModule,
+    RolesModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -25,6 +29,10 @@ import { RolesModule } from 'src/roles/roles.module';
       }),
       inject: [ConfigService],
     }),
+    MongooseModule.forFeature([
+      { name: Role.name, schema: RoleSchema },
+      { name: User.name, schema: UserSchema },
+    ]),
   ],
   controllers: [AuthController],
   exports: [AuthService],

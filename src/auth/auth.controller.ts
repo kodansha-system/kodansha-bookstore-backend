@@ -2,7 +2,9 @@ import {
   Body,
   Controller,
   Get,
+  HttpStatus,
   Post,
+  Req,
   Request,
   Res,
   UseGuards,
@@ -15,6 +17,8 @@ import { RolesService } from 'src/roles/roles.service';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { ApiTags, ApiOkResponse, ApiBody } from '@nestjs/swagger';
 import { UserLoginDto } from './dto/login.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { UsersService } from 'src/users/users.service';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -22,6 +26,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private roleService: RolesService,
+    private usersService: UsersService,
   ) {}
 
   @Public()
@@ -44,7 +49,7 @@ export class AuthController {
   @Public()
   @Post('/register')
   async register(@Body() body: RegisterUserDto) {
-    return this.authService.register(body);
+    return this.authService.registerWithUsernameAndPassword(body);
   }
 
   @Public()
@@ -60,5 +65,26 @@ export class AuthController {
   @Post('/logout')
   async logout(@Request() req, @Res({ passthrough: true }) response) {
     return this.authService.logout(req.user, response);
+  }
+
+  @Public()
+  @Get('/facebook')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookLogin(@Req() req, @Res() res): Promise<any> {
+    const redirectUri = req.query.redirect_uri || '/';
+
+    res.cookie('redirect_uri', redirectUri, { httpOnly: true, maxAge: 60000 });
+
+    return HttpStatus.OK;
+  }
+
+  @Public()
+  @Get('/facebook/redirect')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookLoginRedirect(
+    @Req() req: any,
+    @Res({ passthrough: true }) response,
+  ): Promise<any> {
+    return this.authService.registerWithFacebook(req.user, response);
   }
 }

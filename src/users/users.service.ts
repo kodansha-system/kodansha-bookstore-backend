@@ -54,25 +54,6 @@ export class UsersService {
     return 'Công ty không tồn tại';
   }
 
-  async register(createUserDto: RegisterUserDto) {
-    const { password, email } = createUserDto;
-
-    const isExisted = await this.userModel.findOne({ email });
-    if (isExisted) {
-      throw new BadRequestException('Email đã tồn tại');
-    }
-
-    const defaultRole = await this.roleModel.findOne({ name: USER_ROLE });
-
-    const hashPassword = this.getHashPassword(password);
-    const user = await this.userModel.create({
-      ...createUserDto,
-      password: hashPassword,
-      role: defaultRole?._id,
-    });
-    return user;
-  }
-
   async findAll(query) {
     const { filter, sort, population, projection } = aqp(query);
 
@@ -122,6 +103,7 @@ export class UsersService {
         path: 'role',
         select: { name: 1 },
       })
+      .select('+password')
       .exec();
   }
 
@@ -177,5 +159,9 @@ export class UsersService {
     return this.userModel
       .findOne({ refreshToken })
       .populate({ path: 'role', select: { name: 1 } });
+  };
+
+  findByEmail = async (email: string) => {
+    return this.userModel.findOne({ email });
   };
 }

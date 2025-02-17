@@ -1,13 +1,6 @@
-import { Type } from 'class-transformer';
-import {
-  IsEmail,
-  IsMongoId,
-  IsNotEmpty,
-  IsNotEmptyObject,
-  IsObject,
-  ValidateNested,
-} from 'class-validator';
+import { IsEmail, IsMongoId, IsNotEmpty } from 'class-validator';
 import mongoose from 'mongoose';
+import { AccType } from '../users.interface';
 
 class Company {
   @IsNotEmpty()
@@ -18,7 +11,6 @@ class Company {
 }
 
 export class CreateUserDto {
-  @IsNotEmpty({ message: 'Name không dc để trống' })
   name: string;
 
   @IsEmail()
@@ -28,13 +20,10 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Password không dc để trống' })
   password: string;
 
-  @IsNotEmpty({ message: 'Age không dc để trống' })
   age: number;
 
-  @IsNotEmpty({ message: 'Gender không dc để trống' })
   gender: string;
 
-  @IsNotEmpty({ message: 'Address không dc để trống' })
   address: string;
 
   @IsNotEmpty({ message: 'Role không dc để trống' })
@@ -51,7 +40,6 @@ export class CreateUserDto {
 }
 
 export class RegisterUserDto {
-  @IsNotEmpty({ message: 'Name không dc để trống' })
   name: string;
 
   @IsEmail()
@@ -61,14 +49,26 @@ export class RegisterUserDto {
   @IsNotEmpty({ message: 'Password không dc để trống' })
   password: string;
 
-  @IsNotEmpty({ message: 'Age không dc để trống' })
   age: number;
 
-  @IsNotEmpty({ message: 'Gender không dc để trống' })
   gender: string;
 
-  @IsNotEmpty({ message: 'Address không dc để trống' })
   address: string;
 
   role: string;
+
+  type: AccType;
+}
+
+export class RegisterFacebookUserDto {
+  @IsNotEmpty({ message: 'Name không dc để trống' })
+  name: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsNotEmpty({ message: 'FacebookId không dc để trống' })
+  facebook_id: string;
+
+  type: AccType;
 }

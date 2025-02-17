@@ -47,7 +47,6 @@ export class RolesController {
     @Body() updateRoleDto: UpdateRoleDto,
     @User() user: IUser,
   ) {
-    console.log(updateRoleDto);
     return this.rolesService.update(id, updateRoleDto, user);
   }
 

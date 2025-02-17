@@ -9,10 +9,12 @@ export class User {
   @Prop()
   name: string;
 
-  @Prop({ required: true, unique: true })
+  // @Prop({ required: true, unique: true })
+  @Prop()
   email: string;
 
-  @Prop({ required: true })
+  // @Prop({ required: true })
+  @Prop()
   password: string;
 
   @Prop()
@@ -65,6 +67,12 @@ export class User {
 
   @Prop()
   deletedAt: Date;
+
+  @Prop()
+  facebook_id: string;
+
+  @Prop()
+  type: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

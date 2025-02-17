@@ -50,7 +50,6 @@ export class PermissionsController {
     @Body() updatePermissionDto: UpdatePermissionDto,
     @User() user: IUser,
   ) {
-    console.log(updatePermissionDto);
     return this.permissionsService.update(id, updatePermissionDto, user);
   }
 

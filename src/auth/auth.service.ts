@@ -1,12 +1,22 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { IUser } from 'src/users/users.interface';
-import { RegisterUserDto } from 'src/users/dto/create-user.dto';
+import { AccType, IUser, IUserFacebook } from 'src/users/users.interface';
+import {
+  RegisterFacebookUserDto,
+  RegisterUserDto,
+} from 'src/users/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import ms from 'ms';
 import { RolesService } from 'src/roles/roles.service';
+import { getHashPassword } from 'src/utils';
+import { USER_ROLE } from 'src/databases/sample';
+import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
+import { User, UserDocument } from 'src/users/schemas/user.schema';
+import { Profile } from 'passport';
 
 @Injectable()
 export class AuthService {
@@ -15,12 +25,21 @@ export class AuthService {
     private rolesService: RolesService,
     private jwtService: JwtService,
     private configService: ConfigService,
+
+    @InjectModel(Role.name)
+    private roleModel: SoftDeleteModel<RoleDocument>,
+
+    @InjectModel(User.name)
+    private userModel: SoftDeleteModel<UserDocument>,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
     const user = (await this.usersService.findOneByUsername(username)) as any;
     if (user) {
-      const isValid = this.usersService.isValidPassword(pass, user.password);
+      const isValid = this.usersService.isValidPassword(
+        pass,
+        user.toObject().password,
+      );
       if (isValid) {
         const temp = await this.rolesService.findOne(user?.role?._id);
         const { password, ...result } = user;
@@ -31,7 +50,7 @@ export class AuthService {
   }
 
   async login(user: any, response: Response) {
-    const { _id, email, name, role, permissions } = user;
+    const { _id, email, name, role, permissions, type } = user;
 
     const payload = {
       iss: 'from server',
@@ -40,6 +59,7 @@ export class AuthService {
       email,
       name,
       role,
+      type,
     };
 
     const refresh_token = this.createRefreshToken(payload);
@@ -59,16 +79,90 @@ export class AuthService {
         name,
         role,
         permissions,
+        type,
       },
     };
   }
 
-  async register(data: RegisterUserDto) {
-    const res: any = await this.usersService.register(data);
-    return {
-      _id: res?._id,
-      createdAt: res?.createdAt,
+  async registerWithUsernameAndPassword(createUserDto: RegisterUserDto) {
+    const { password, email } = createUserDto;
+
+    const isExisted = await this.userModel.findOne({ email });
+
+    if (isExisted) {
+      throw new BadRequestException('Email is existed');
+    }
+
+    const defaultRole = await this.roleModel.findOne({ name: USER_ROLE });
+
+    const hashPassword = getHashPassword(password);
+
+    const user = await this.userModel.create({
+      ...createUserDto,
+      password: hashPassword,
+      role: defaultRole?._id,
+      type: AccType.NORMAL,
+    });
+
+    const response = user.toObject();
+
+    delete response.password;
+
+    return response;
+  }
+
+  async registerWithFacebook(data: IUserFacebook, response) {
+    const { id, name } = data;
+
+    const defaultRole = await this.roleModel.findOne({ name: USER_ROLE });
+
+    const createTokenAndRefreshToken = async (
+      facebookId: string,
+      userRole: any,
+    ) => {
+      const refresh_token = this.createRefreshToken({
+        facebook_id: facebookId,
+        role: userRole?._id,
+        type: AccType.FACEBOOK,
+      });
+
+      response.cookie('refresh_token', refresh_token, {
+        httpOnly: true,
+        maxAge: ms(this.configService.get<string>('REFRESH_TOKEN_EXPIRED')),
+      });
+
+      return {
+        access_token: this.jwtService.sign({
+          facebook_id: facebookId,
+          role: userRole?._id,
+          type: AccType.FACEBOOK,
+        }),
+        refresh_token,
+        user: { facebook_id: facebookId, name },
+      };
     };
+
+    const userFacebook = await this.userModel.findOne({ facebook_id: id });
+
+    if (userFacebook) {
+      const updatedName = userFacebook.name || name;
+
+      await this.userModel.updateOne(
+        { facebook_id: id },
+        { name: updatedName },
+      );
+
+      return await createTokenAndRefreshToken(id, userFacebook.role);
+    }
+
+    await this.userModel.create({
+      facebook_id: id,
+      name,
+      role: defaultRole?._id,
+      type: AccType.FACEBOOK,
+    });
+
+    return await createTokenAndRefreshToken(id, defaultRole);
   }
 
   createRefreshToken = (payload) => {

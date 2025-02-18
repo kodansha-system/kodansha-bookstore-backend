@@ -1,11 +1,9 @@
+import { firebaseAdmin } from './../../config/firebase.config';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { AccType, IUser, IUserFacebook } from 'src/users/users.interface';
-import {
-  RegisterFacebookUserDto,
-  RegisterUserDto,
-} from 'src/users/dto/create-user.dto';
+import { AccType, IUserFacebook } from 'src/users/users.interface';
+import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import ms from 'ms';
@@ -16,7 +14,6 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
-import { Profile } from 'passport';
 
 @Injectable()
 export class AuthService {
@@ -50,38 +47,42 @@ export class AuthService {
   }
 
   async login(user: any, response: Response) {
-    const { _id, email, name, role, permissions, type } = user;
+    try {
+      const { _id, email, name, role, permissions, type } = user;
 
-    const payload = {
-      iss: 'from server',
-      sub: 'token login',
-      _id,
-      email,
-      name,
-      role,
-      type,
-    };
-
-    const refresh_token = this.createRefreshToken(payload);
-
-    await this.usersService.updateUserToken(refresh_token, _id);
-
-    response.cookie('refresh_token', refresh_token, {
-      httpOnly: true,
-      maxAge: ms(this.configService.get<string>('REFRESH_TOKEN_EXPIRED')),
-    });
-
-    return {
-      access_token: this.jwtService.sign(payload),
-      user: {
+      const payload = {
+        iss: 'from server',
+        sub: 'token login',
         _id,
         email,
         name,
         role,
-        permissions,
         type,
-      },
-    };
+      };
+
+      const refresh_token = this.createRefreshToken(payload);
+
+      await this.usersService.updateUserToken(refresh_token, _id);
+
+      response.cookie('refresh_token', refresh_token, {
+        httpOnly: true,
+        maxAge: ms(this.configService.get<string>('REFRESH_TOKEN_EXPIRED')),
+      });
+
+      return {
+        access_token: this.jwtService.sign(payload),
+        user: {
+          _id,
+          email,
+          name,
+          role,
+          permissions,
+          type,
+        },
+      };
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async registerWithUsernameAndPassword(createUserDto: RegisterUserDto) {
@@ -112,7 +113,7 @@ export class AuthService {
   }
 
   async registerWithFacebook(data: IUserFacebook, response) {
-    const { id, name } = data;
+    const { id, name, image } = data;
 
     const defaultRole = await this.roleModel.findOne({ name: USER_ROLE });
 
@@ -138,7 +139,7 @@ export class AuthService {
           type: AccType.FACEBOOK,
         }),
         refresh_token,
-        user: { facebook_id: facebookId, name },
+        user: { facebook_id: facebookId, name, role: userRole?._id, image },
       };
     };
 
@@ -149,7 +150,7 @@ export class AuthService {
 
       await this.userModel.updateOne(
         { facebook_id: id },
-        { name: updatedName },
+        { name: updatedName, image },
       );
 
       return await createTokenAndRefreshToken(id, userFacebook.role);
@@ -158,6 +159,7 @@ export class AuthService {
     await this.userModel.create({
       facebook_id: id,
       name,
+      image,
       role: defaultRole?._id,
       type: AccType.FACEBOOK,
     });
@@ -223,6 +225,41 @@ export class AuthService {
     if (userLogout) {
       response.clearCookie('refresh_token');
       await this.usersService.updateUserToken('', user?._id);
+    }
+  };
+
+  async verifyGoogleToken(token: string) {
+    try {
+      const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
+      const uid = decodedToken.uid;
+      const user = await firebaseAdmin.auth().getUser(uid);
+      return user.providerData;
+    } catch (error) {
+      throw new Error('Invalid token');
+    }
+  }
+
+  registerGoogleUser = async (data, response) => {
+    try {
+      const defaultRole = await this.roleModel.findOne({ name: USER_ROLE });
+      const { displayName, email, photoURL } = data[0];
+      const user = await this.userModel.findOne({ email });
+
+      if (user) {
+        return await this.login(user.toObject(), response);
+      }
+
+      const userData = await this.userModel.create({
+        email,
+        name: displayName,
+        image: photoURL,
+        role: defaultRole?._id,
+        type: AccType.GOOGLE,
+      });
+
+      return await this.login(userData.toObject(), response);
+    } catch (err) {
+      console.log(err);
     }
   };
 }

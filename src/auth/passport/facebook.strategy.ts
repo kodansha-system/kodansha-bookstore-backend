@@ -10,7 +10,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       clientSecret: process.env.FACEBOOK_APP_SECRET,
       callbackURL: process.env.FACEBOOK_APP_REDIRECT,
       scope: 'email',
-      profileFields: ['emails', 'name'],
+      profileFields: ['emails', 'name', 'photos'],
     });
   }
 
@@ -25,6 +25,7 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     const user = {
       id,
       email: emails?.[0]?.value,
+      image: profile?.photos?.[0]?.value,
       name: displayName || name?.givenName + ' ' + name?.familyName,
     };
 

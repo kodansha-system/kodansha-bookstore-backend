@@ -24,6 +24,7 @@ export interface IUserFacebook {
   id: string;
   email: string;
   name: string;
+  image: string;
 }
 
 export enum AccType {

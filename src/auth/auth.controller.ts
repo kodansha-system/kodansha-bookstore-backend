@@ -70,7 +70,10 @@ export class AuthController {
   @Public()
   @Get('/facebook')
   @UseGuards(AuthGuard('facebook'))
-  async facebookLogin(@Req() req, @Res() res): Promise<any> {
+  async facebookLogin(
+    @Req() req,
+    @Res({ passthrough: true }) res,
+  ): Promise<any> {
     const redirectUri = req.query.redirect_uri || '/';
 
     res.cookie('redirect_uri', redirectUri, { httpOnly: true, maxAge: 60000 });
@@ -86,5 +89,15 @@ export class AuthController {
     @Res({ passthrough: true }) response,
   ): Promise<any> {
     return this.authService.registerWithFacebook(req.user, response);
+  }
+
+  @Public()
+  @Post('google-login')
+  async googleLogin(
+    @Body('token') token: string,
+    @Res({ passthrough: true }) response,
+  ) {
+    const userData = await this.authService.verifyGoogleToken(token);
+    return await this.authService.registerGoogleUser(userData, response);
   }
 }

@@ -1,5 +1,5 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
+import { Injectable } from '@nestjs/common';
+import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
@@ -8,16 +8,12 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { Company, CompanyDocument } from 'src/companies/schemas/company.schema';
 import { IUser } from './users.interface';
 import aqp from 'api-query-params';
-import { USER_ROLE } from 'src/databases/sample';
-import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument>,
     @InjectModel(Company.name)
     private companyModel: SoftDeleteModel<CompanyDocument>,
-    @InjectModel(Role.name)
-    private roleModel: SoftDeleteModel<RoleDocument>,
   ) {}
 
   getHashPassword = (password: string) => {
@@ -37,6 +33,9 @@ export class UsersService {
     if (company) {
       const user = await this.userModel.create({
         ...createUserDto,
+        username:
+          createUserDto.username ||
+          `user${crypto.randomUUID().substring(0, 8)}`,
         password: hashPassword,
         company: {
           _id: company?._id,
@@ -97,7 +96,7 @@ export class UsersService {
   async findOneByUsername(username: string) {
     return await this.userModel
       .findOne({
-        email: username,
+        $or: [{ email: username }, { username: username }],
       })
       .populate({
         path: 'role',

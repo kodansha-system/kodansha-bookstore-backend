@@ -79,6 +79,12 @@ export class User {
 
   @Prop()
   google_id: string;
+
+  @Prop()
+  phone_number: string;
+
+  @Prop()
+  username: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -20,6 +20,8 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Password không dc để trống' })
   password: string;
 
+  username: string;
+
   age: number;
 
   gender: string;

@@ -100,6 +100,7 @@ export class AuthService {
 
     const user = await this.userModel.create({
       ...createUserDto,
+      username: `user${crypto.randomUUID().substring(0, 8)}`,
       password: hashPassword,
       role: defaultRole?._id,
       type: AccType.NORMAL,
@@ -159,6 +160,7 @@ export class AuthService {
     await this.userModel.create({
       facebook_id: id,
       name,
+      username: `user${crypto.randomUUID().substring(0, 8)}`,
       image,
       role: defaultRole?._id,
       type: AccType.FACEBOOK,
@@ -252,6 +254,7 @@ export class AuthService {
       const userData = await this.userModel.create({
         email,
         name: displayName,
+        username: `user${crypto.randomUUID().substring(0, 8)}`,
         image: photoURL,
         role: defaultRole?._id,
         type: AccType.GOOGLE,

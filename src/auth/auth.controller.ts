@@ -20,6 +20,7 @@ import { ApiTags, ApiOkResponse, ApiBody } from '@nestjs/swagger';
 import { UserLoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from 'src/users/users.service';
+import { I18nService } from 'nestjs-i18n';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -28,6 +29,7 @@ export class AuthController {
     private authService: AuthService,
     private roleService: RolesService,
     private usersService: UsersService,
+    private readonly i18n: I18nService,
   ) {}
 
   @Public()
@@ -99,7 +101,7 @@ export class AuthController {
     @Res({ passthrough: true }) response,
   ) {
     const userData = await this.authService.verifyGoogleToken(token);
-    return await this.authService.registerGoogleUser(userData, response);
+    // return await this.authService.registerGoogleUser(userData, response);
   }
 
   @Public()

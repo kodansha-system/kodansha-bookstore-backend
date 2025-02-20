@@ -274,7 +274,6 @@ export class AuthService {
     if (!user) throw new BadRequestException('Email không tồn tại');
 
     const new_password = crypto.randomUUID().substring(0, 8);
-    console.log(new_password, getHashPassword(new_password));
     const hash_password = getHashPassword(new_password);
 
     await this.usersService.updatePassword(email, hash_password);

@@ -101,7 +101,7 @@ export class AuthController {
     @Res({ passthrough: true }) response,
   ) {
     const userData = await this.authService.verifyGoogleToken(token);
-    // return await this.authService.registerGoogleUser(userData, response);
+    return await this.authService.registerGoogleUser(userData, response);
   }
 
   @Public()

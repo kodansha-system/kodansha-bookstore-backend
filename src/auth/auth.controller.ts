@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -99,5 +100,15 @@ export class AuthController {
   ) {
     const userData = await this.authService.verifyGoogleToken(token);
     return await this.authService.registerGoogleUser(userData, response);
+  }
+
+  @Public()
+  @Post('forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    const user = await this.usersService.findOneByUsername(email);
+    if (!user) throw new BadRequestException('Email không tồn tại');
+
+    await this.authService.sendNewPassword(email);
+    return { message: 'Mật khẩu mới đã được gửi vào email của bạn' };
   }
 }

@@ -163,4 +163,8 @@ export class UsersService {
   findByEmail = async (email: string) => {
     return this.userModel.findOne({ email });
   };
+
+  updatePassword = async (email: string, password: string) => {
+    return this.userModel.updateOne({ email }, { password });
+  };
 }

@@ -1,4 +1,4 @@
-import { firebaseAdmin } from './../../config/firebase.config';
+import { firebaseAdmin } from '../config/firebase.config';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UsersService } from 'src/users/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -14,6 +14,7 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     private rolesService: RolesService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private readonly mailService: MailerService,
 
     @InjectModel(Role.name)
     private roleModel: SoftDeleteModel<RoleDocument>,
@@ -264,5 +266,28 @@ export class AuthService {
     } catch (err) {
       console.log(err);
     }
+  };
+
+  sendNewPassword = async (email: string) => {
+    const user = await this.usersService.findOneByUsername(email);
+    if (!user) throw new BadRequestException('Email không tồn tại');
+
+    const new_password = crypto.randomUUID().substring(0, 8);
+    console.log(new_password, getHashPassword(new_password));
+    const hash_password = getHashPassword(new_password);
+
+    await this.usersService.updatePassword(email, hash_password);
+
+    await this.mailService.sendMail({
+      to: email,
+      from: '"IT VIP pro" <abc@gmail.com>',
+      subject: 'Đặt lại mật khẩu của bạn!',
+      template: 'reset-password',
+      context: {
+        receiver: 'Lương Minh Anh',
+        new_password,
+        reset_link: '#',
+      },
+    });
   };
 }

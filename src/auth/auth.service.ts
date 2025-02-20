@@ -15,7 +15,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { MailerService } from '@nestjs-modules/mailer';
-
+import { I18nService } from 'nestjs-i18n';
 @Injectable()
 export class AuthService {
   constructor(
@@ -24,6 +24,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private readonly mailService: MailerService,
+    private i18n: I18nService,
 
     @InjectModel(Role.name)
     private roleModel: SoftDeleteModel<RoleDocument>,
@@ -273,7 +274,6 @@ export class AuthService {
     if (!user) throw new BadRequestException('Email không tồn tại');
 
     const new_password = crypto.randomUUID().substring(0, 8);
-    console.log(new_password, getHashPassword(new_password));
     const hash_password = getHashPassword(new_password);
 
     await this.usersService.updatePassword(email, hash_password);

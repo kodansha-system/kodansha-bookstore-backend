@@ -19,6 +19,9 @@ import { MailModule } from './mail/mail.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { HealthModule } from './health/health.module';
+import { AcceptLanguageResolver, I18nModule } from 'nestjs-i18n';
+import path from 'path';
+import { loadTranslationsFromExcel } from './i18n/excel-loader';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -67,6 +70,15 @@ import { HealthModule } from './health/health.module';
     }),
 
     HealthModule,
+
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loaderOptions: {
+        path: path.join(__dirname, '/i18n/'),
+        watch: true,
+      },
+      resolvers: [AcceptLanguageResolver],
+    }),
   ],
 
   controllers: [AppController],
@@ -86,4 +98,8 @@ import { HealthModule } from './health/health.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    loadTranslationsFromExcel();
+  }
+}

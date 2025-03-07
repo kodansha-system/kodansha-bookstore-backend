@@ -22,6 +22,7 @@ import { HealthModule } from './health/health.module';
 import { AcceptLanguageResolver, I18nModule } from 'nestjs-i18n';
 import path from 'path';
 import { loadTranslationsFromExcel } from './i18n/excel-loader';
+import { AuthorsModule } from './authors/authors.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -61,6 +62,8 @@ import { loadTranslationsFromExcel } from './i18n/excel-loader';
     SubscribersModule,
 
     MailModule,
+
+    AuthorsModule,
 
     ScheduleModule.forRoot(),
 

@@ -50,7 +50,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         return api_path === currPath && method === currMethod;
       });
 
-      if (currPath?.startsWith('/api/v1/auth')) {
+      const authRegex = /^\/api\/v1\/auth(\/|$)/;
+
+      if (authRegex.test(currPath)) {
         hasPermission = true;
       }
 

@@ -1,23 +1,23 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateAuthorDto } from './dto/create-author.dto';
-import { UpdateAuthorDto } from './dto/update-author.dto';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Author, AuthorDocument } from './schemas/author.schema';
+import { Category, CategoryDocument } from './schemas/category.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import { FilesService } from 'src/files/files.service';
 @Injectable()
-export class AuthorsService {
+export class CategoriesService {
   constructor(
-    @InjectModel(Author.name)
-    private authorModel: SoftDeleteModel<AuthorDocument>,
+    @InjectModel(Category.name)
+    private categoryModel: SoftDeleteModel<CategoryDocument>,
 
     private fileService: FilesService,
   ) {}
 
   async create(
-    createAuthorDto: CreateAuthorDto,
+    createCategoryDto: CreateCategoryDto,
     user: IUserBody,
     file: Express.Multer.File,
   ) {
@@ -27,14 +27,14 @@ export class AuthorsService {
       throw new BadRequestException('Invalid file type.');
     });
 
-    const author = await this.authorModel.create({
-      ...createAuthorDto,
+    const category = await this.categoryModel.create({
+      ...createCategoryDto,
       image: image.url,
       createdBy: user._id,
     });
 
     return {
-      author,
+      category,
     };
   }
 
@@ -47,10 +47,10 @@ export class AuthorsService {
     delete filter?.current;
     delete filter?.pageSize;
 
-    const totalItems = (await this.authorModel.find(filter)).length;
+    const totalItems = (await this.categoryModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    const result = await this.authorModel
+    const result = await this.categoryModel
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
@@ -66,12 +66,12 @@ export class AuthorsService {
         totalItems,
         totalPages,
       },
-      authors: result,
+      categories: result,
     };
   }
 
   async findOne(id: string) {
-    return await this.authorModel.findById(id).populate([
+    return await this.categoryModel.findById(id).populate([
       {
         path: 'createdBy',
         select: '_id name role',
@@ -93,7 +93,7 @@ export class AuthorsService {
 
   async update(
     id: string,
-    updateAuthorDto: UpdateAuthorDto,
+    updateCategoryDto: UpdateCategoryDto,
     user: IUserBody,
     file?: Express.Multer.File,
   ) {
@@ -104,23 +104,23 @@ export class AuthorsService {
         throw new BadRequestException('Invalid file type.');
       });
 
-      const updateAuthor = await this.authorModel.updateOne(
+      const updateCategory = await this.categoryModel.updateOne(
         { _id: id },
-        { ...updateAuthorDto, image: image.url, updatedBy: user._id },
+        { ...updateCategoryDto, image: image.url, updatedBy: user._id },
       );
 
-      return updateAuthor;
+      return updateCategory;
     }
-    const updateAuthor = await this.authorModel.updateOne(
+    const updateCategory = await this.categoryModel.updateOne(
       { _id: id },
-      { ...updateAuthorDto, updatedBy: user._id },
+      { ...updateCategoryDto, updatedBy: user._id },
     );
 
-    return updateAuthor;
+    return updateCategory;
   }
 
   remove(id: string, user: IUserBody) {
-    return this.authorModel.updateOne(
+    return this.categoryModel.updateOne(
       { _id: id },
       {
         deletedBy: user._id,

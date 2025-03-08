@@ -10,57 +10,57 @@ import {
   UploadedFile,
   Patch,
 } from '@nestjs/common';
-import { CreateAuthorDto } from './dto/create-author.dto';
-import { UpdateAuthorDto } from './dto/update-author.dto';
 import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { IUserBody } from 'src/users/users.interface';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthorsService } from './authors.service';
+import { CategoriesService } from './categories.service';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
-@ApiTags('authors')
-@Controller('authors')
-export class AuthorsController {
-  constructor(private readonly authorsService: AuthorsService) {}
+@ApiTags('categories')
+@Controller('categories')
+export class CategoriesController {
+  constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
   @UseInterceptors(FileInterceptor('image'))
   create(
-    @Body() createAuthorDto: CreateAuthorDto,
+    @Body() createCategoryDto: CreateCategoryDto,
     @User() user: IUserBody,
     @UploadedFile()
     file: Express.Multer.File,
   ) {
-    return this.authorsService.create(createAuthorDto, user, file);
+    return this.categoriesService.create(createCategoryDto, user, file);
   }
 
   @Public()
-  @ResponseMessage('Lấy danh sách tác giả thành công')
+  @ResponseMessage('Lấy danh sách danh mục thành công')
   @Get()
   findAll(@Query() query) {
-    return this.authorsService.findAll(query);
+    return this.categoriesService.findAll(query);
   }
 
   @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.authorsService.findOne(id);
+    return this.categoriesService.findOne(id);
   }
 
   @Patch(':id')
   @UseInterceptors(FileInterceptor('image'))
   update(
     @Param('id') id: string,
-    @Body() updateAuthorDto: UpdateAuthorDto,
+    @Body() updateCategoryDto: UpdateCategoryDto,
     @User() user: IUserBody,
     @UploadedFile()
     file: Express.Multer.File,
   ) {
-    return this.authorsService.update(id, updateAuthorDto, user, file);
+    return this.categoriesService.update(id, updateCategoryDto, user, file);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @User() user: IUserBody) {
-    return this.authorsService.remove(id, user);
+    return this.categoriesService.remove(id, user);
   }
 }

@@ -24,6 +24,7 @@ import path from 'path';
 import { loadTranslationsFromExcel } from './i18n/excel-loader';
 import { AuthorsModule } from './authors/authors.module';
 import { CategoriesModule } from './categories/categories.module';
+import { BooksModule } from './books/books.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -67,6 +68,8 @@ import { CategoriesModule } from './categories/categories.module';
     AuthorsModule,
 
     CategoriesModule,
+
+    BooksModule,
 
     ScheduleModule.forRoot(),
 

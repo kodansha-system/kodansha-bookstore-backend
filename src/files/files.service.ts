@@ -29,7 +29,7 @@ export class FilesService {
     if (!file) return;
 
     const allowedTypes =
-      /^(image\/jpeg|image\/png|image\/gif|text\/plain|application\/pdf|application\/msword|application\/vnd.openxmlformats-officedocument.wordprocessingml.document)$/i;
+      /^(image\/jpeg|image\/png|image\/gif|image\/webp|text\/plain|application\/pdf|application\/msword|application\/vnd.openxmlformats-officedocument.wordprocessingml.document)$/i;
 
     if (!allowedTypes.test(file.mimetype)) {
       throw new BadRequestException('File type is not allowed');

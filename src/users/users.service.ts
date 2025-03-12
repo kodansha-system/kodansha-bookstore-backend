@@ -70,7 +70,10 @@ export class UsersService {
       .skip(offset)
       .limit(defaultLimit)
       .sort(sort as any)
-      .populate(population)
+      .populate({
+        path: 'role',
+        select: 'name',
+      })
       // .projection(projection)
       .exec();
 

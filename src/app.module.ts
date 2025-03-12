@@ -26,6 +26,11 @@ import { AuthorsModule } from './authors/authors.module';
 import { CategoriesModule } from './categories/categories.module';
 import { BooksModule } from './books/books.module';
 import { BannersModule } from './banners/banners.module';
+import { ShopAddressesModule } from './shop_addresses/shop-addresses.module';
+import { ProvincesModule } from './provinces/provinces.module';
+import { UserAddressesModule } from './user_addresses/user-addresses.module';
+import { DistrictsModule } from './districts/districts.module';
+import { WardsModule } from './wards/wards.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -73,6 +78,16 @@ import { BannersModule } from './banners/banners.module';
     BooksModule,
 
     BannersModule,
+
+    ShopAddressesModule,
+
+    UserAddressesModule,
+
+    ProvincesModule,
+
+    DistrictsModule,
+
+    WardsModule,
 
     ScheduleModule.forRoot(),
 

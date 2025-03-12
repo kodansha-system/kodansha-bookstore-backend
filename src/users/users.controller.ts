@@ -7,12 +7,15 @@ import {
   Param,
   Delete,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Public, User } from 'src/decorator/customize';
 import { ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('users')
 @Controller('users')
@@ -20,8 +23,14 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto, @User() user) {
-    return this.usersService.createNewUser(createUserDto, user);
+  @UseInterceptors(FileInterceptor('image'))
+  create(
+    @Body() createUserDto: CreateUserDto,
+    @User() user,
+    @UploadedFile()
+    file: Express.Multer.File,
+  ) {
+    return this.usersService.createNewUser(createUserDto, user, file);
   }
 
   @Get()
@@ -45,12 +54,15 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @UseInterceptors(FileInterceptor('image'))
   update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
     @User() user,
+    @UploadedFile()
+    file: Express.Multer.File,
   ) {
-    return this.usersService.update(id, updateUserDto, user);
+    return this.usersService.update(id, updateUserDto, user, file);
   }
 
   @Delete(':id')

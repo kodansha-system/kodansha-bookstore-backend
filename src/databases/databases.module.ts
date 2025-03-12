@@ -10,6 +10,7 @@ import {
 } from 'src/permissions/schemas/permission.schema';
 import { UsersService } from 'src/users/users.service';
 import { Company, CompanySchema } from 'src/companies/schemas/company.schema';
+import { FilesService } from 'src/files/files.service';
 
 @Module({
   imports: [
@@ -21,6 +22,6 @@ import { Company, CompanySchema } from 'src/companies/schemas/company.schema';
     ]),
   ],
   controllers: [DatabasesController],
-  providers: [DatabasesService, UsersService],
+  providers: [DatabasesService, UsersService, FilesService],
 })
 export class DatabasesModule {}

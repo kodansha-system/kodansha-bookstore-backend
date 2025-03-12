@@ -1,19 +1,20 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { genSaltSync, hashSync, compareSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { Company, CompanyDocument } from 'src/companies/schemas/company.schema';
 import { IUser } from './users.interface';
 import aqp from 'api-query-params';
+import { FilesService } from 'src/files/files.service';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument>,
-    @InjectModel(Company.name)
-    private companyModel: SoftDeleteModel<CompanyDocument>,
+    @InjectModel(User.name)
+    private userModel: SoftDeleteModel<UserDocument>,
+
+    private fileService: FilesService,
   ) {}
 
   getHashPassword = (password: string) => {
@@ -22,27 +23,31 @@ export class UsersService {
     return hash;
   };
 
-  async createNewUser(createUserDto: CreateUserDto, createdBy: IUser) {
+  async createNewUser(
+    createUserDto: CreateUserDto,
+    createdBy: IUser,
+    file?: Express.Multer.File,
+  ) {
     const { password } = createUserDto;
     const hashPassword = this.getHashPassword(password);
 
-    const company: any = await this.companyModel.findById(
-      createUserDto.company_id,
-    );
+    if (file) {
+      this.fileService.validateFile(file);
 
-    if (company) {
+      const image = await this.fileService.uploadImage(file).catch(() => {
+        throw new BadRequestException('Invalid file type.');
+      });
+
       const user = await this.userModel.create({
         ...createUserDto,
         username:
           createUserDto.username ||
           `user${crypto.randomUUID().substring(0, 8)}`,
         password: hashPassword,
-        company: {
-          _id: company?._id,
-          name: company?.name,
-        },
+        image: image.url,
         createdBy,
       });
+
       return {
         _id: user?._id,
         createdAt: user?.createdAt,
@@ -50,7 +55,19 @@ export class UsersService {
       };
     }
 
-    return 'Công ty không tồn tại';
+    const user = await this.userModel.create({
+      ...createUserDto,
+      username:
+        createUserDto.username || `user${crypto.randomUUID().substring(0, 8)}`,
+      password: hashPassword,
+      createdBy,
+    });
+
+    return {
+      _id: user?._id,
+      createdAt: user?.createdAt,
+      createdBy: user?.createdBy,
+    };
   }
 
   async findAll(query) {
@@ -109,11 +126,37 @@ export class UsersService {
       .exec();
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto, updatedBy: IUser) {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    updatedBy: IUser,
+    file?: Express.Multer.File,
+  ) {
     const user: any = await this.userModel.findById(id);
     if (updateUserDto?.password) {
       const { password } = updateUserDto;
       const hashPassword = this.getHashPassword(password);
+
+      if (file) {
+        this.fileService.validateFile(file);
+
+        const image = await this.fileService.uploadImage(file).catch(() => {
+          throw new BadRequestException('Invalid file type.');
+        });
+
+        const updatedUser = await this.userModel.updateOne(
+          { _id: user?._doc?._id },
+          {
+            ...updateUserDto,
+            password: hashPassword,
+            image: image.url,
+            updatedBy,
+          },
+        );
+
+        return updatedUser;
+      }
+
       const updatedUser = await this.userModel.updateOne(
         { _id: user?._doc?._id },
         {
@@ -122,6 +165,7 @@ export class UsersService {
           updatedBy,
         },
       );
+
       return updatedUser;
     } else {
       const updatedUser = await this.userModel.updateOne(
@@ -131,6 +175,7 @@ export class UsersService {
           updatedBy,
         },
       );
+
       return updatedUser;
     }
   }

@@ -127,6 +127,6 @@ import { WardsModule } from './wards/wards.module';
 })
 export class AppModule {
   constructor() {
-    loadTranslationsFromExcel();
+    // loadTranslationsFromExcel();
   }
 }

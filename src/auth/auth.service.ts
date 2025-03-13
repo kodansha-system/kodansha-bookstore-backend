@@ -70,6 +70,8 @@ export class AuthService {
       response.cookie('refresh_token', refresh_token, {
         httpOnly: true,
         maxAge: ms(this.configService.get<string>('REFRESH_TOKEN_EXPIRED')),
+        sameSite: 'lax',
+        secure: false,
       });
 
       return {

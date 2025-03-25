@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateUserAddressDto {
   @IsNotEmpty()
@@ -15,4 +15,7 @@ export class CreateUserAddressDto {
 
   @IsNotEmpty()
   province: string;
+
+  @IsString()
+  customer_name: string;
 }

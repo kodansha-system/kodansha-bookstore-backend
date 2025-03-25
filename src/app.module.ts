@@ -31,6 +31,9 @@ import { ProvincesModule } from './provinces/provinces.module';
 import { UserAddressesModule } from './user_addresses/user-addresses.module';
 import { DistrictsModule } from './districts/districts.module';
 import { WardsModule } from './wards/wards.module';
+import { CartsModule } from './carts/carts.module';
+import { CarriersModule } from './carriers/carriers.module';
+import { OrdersModule } from './orders/orders.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -88,6 +91,12 @@ import { WardsModule } from './wards/wards.module';
     DistrictsModule,
 
     WardsModule,
+
+    CartsModule,
+
+    CarriersModule,
+
+    OrdersModule,
 
     ScheduleModule.forRoot(),
 

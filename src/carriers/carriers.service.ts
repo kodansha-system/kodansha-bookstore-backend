@@ -1,49 +1,40 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateBookDto } from './dto/create-book.dto';
-import { UpdateBookDto } from './dto/update-book.dto';
+import { CreateCarrierDto } from './dto/create-carrier.dto';
+import { UpdateCarrierDto } from './dto/update-carrier.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Book, BookDocument } from './schemas/book.schema';
+import { Carrier, CarrierDocument } from './schemas/carrier.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import { FilesService } from 'src/files/files.service';
 @Injectable()
-export class BooksService {
+export class CarriersService {
   constructor(
-    @InjectModel(Book.name)
-    private bookModel: SoftDeleteModel<BookDocument>,
+    @InjectModel(Carrier.name)
+    private carrierModel: SoftDeleteModel<CarrierDocument>,
 
     private fileService: FilesService,
   ) {}
 
   async create(
-    createBookDto: CreateBookDto,
+    createCarrierDto: CreateCarrierDto,
     user: IUserBody,
-    files: Express.Multer.File[],
+    file: Express.Multer.File,
   ) {
-    console.log(createBookDto, 'check create');
+    this.fileService.validateFile(file);
 
-    if (!files || files.length === 0) {
-      throw new BadRequestException('No images uploaded.');
-    }
-
-    const uploadedImages = await Promise.all(
-      files.map(async (file) => {
-        this.fileService.validateFile(file);
-        return this.fileService.uploadImage(file);
-      }),
-    ).catch(() => {
+    const image = await this.fileService.uploadImage(file).catch(() => {
       throw new BadRequestException('Invalid file type.');
     });
 
-    const book = await this.bookModel.create({
-      ...createBookDto,
-      images: uploadedImages.map((img) => img.url),
+    const carrier = await this.carrierModel.create({
+      ...createCarrierDto,
+      image: image.url,
       createdBy: user._id,
     });
 
     return {
-      book,
+      carrier,
     };
   }
 
@@ -56,10 +47,10 @@ export class BooksService {
     delete filter?.current;
     delete filter?.pageSize;
 
-    const totalItems = (await this.bookModel.find(filter)).length;
+    const totalItems = (await this.carrierModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    const result = await this.bookModel
+    const result = await this.carrierModel
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
@@ -75,12 +66,12 @@ export class BooksService {
         totalItems,
         totalPages,
       },
-      books: result,
+      carriers: result,
     };
   }
 
   async findOne(id: string) {
-    return await this.bookModel.findById(id).populate([
+    return await this.carrierModel.findById(id).populate([
       {
         path: 'createdBy',
         select: '_id name role',
@@ -97,54 +88,39 @@ export class BooksService {
           select: 'name',
         },
       },
-      {
-        path: 'authors',
-        select: 'name',
-      },
-      {
-        path: 'categories',
-        select: 'name',
-      },
     ]);
   }
 
   async update(
     id: string,
-    updateBookDto: UpdateBookDto,
+    updateCarrierDto: UpdateCarrierDto,
     user: IUserBody,
-    files?: Express.Multer.File[],
+    file?: Express.Multer.File,
   ) {
-    console.log(updateBookDto, 'check');
+    if (file) {
+      this.fileService.validateFile(file);
 
-    if (files) {
-      const uploadedImages = await Promise.all(
-        files.map(async (file) => {
-          this.fileService.validateFile(file);
-          return this.fileService.uploadImage(file);
-        }),
-      ).catch(() => {
+      const image = await this.fileService.uploadImage(file).catch(() => {
         throw new BadRequestException('Invalid file type.');
       });
 
-      const books = await this.bookModel.create({
-        ...updateBookDto,
-        images: uploadedImages.map((img) => img.url),
-        updatedBy: user._id,
-      });
+      const updateCarrier = await this.carrierModel.updateOne(
+        { _id: id },
+        { ...updateCarrierDto, image: image.url, updatedBy: user._id },
+      );
 
-      return books;
+      return updateCarrier;
     }
-
-    const updateBook = await this.bookModel.updateOne(
+    const updateCarrier = await this.carrierModel.updateOne(
       { _id: id },
-      { ...updateBookDto, updatedBy: user._id },
+      { ...updateCarrierDto, updatedBy: user._id },
     );
 
-    return updateBook;
+    return updateCarrier;
   }
 
   remove(id: string, user: IUserBody) {
-    return this.bookModel.updateOne(
+    return this.carrierModel.updateOne(
       { _id: id },
       {
         deleted_by: user._id,

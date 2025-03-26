@@ -19,7 +19,7 @@ export class OrdersService {
       ...createOrderDto,
       user_id: user?._id,
       order_status: OrderStatus.PENDING,
-      createdBy: user,
+      created_by: user,
     });
 
     return {

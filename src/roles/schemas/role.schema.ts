@@ -18,13 +18,13 @@ export class Role {
   permissions: mongoose.Schema.Types.ObjectId[];
 
   @Prop({ type: Object })
-  createdBy: {
+  created_by: {
     _id: mongoose.Schema.Types.ObjectId;
     email: string;
   };
 
   @Prop({ type: Object })
-  updatedBy: {
+  updated_by: {
     _id: mongoose.Schema.Types.ObjectId;
     email: string;
   };

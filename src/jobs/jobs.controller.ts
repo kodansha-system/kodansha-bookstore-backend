@@ -22,8 +22,8 @@ export class JobsController {
 
   @ResponseMessage('Create a new job')
   @Post()
-  create(@Body() createJobDto: CreateJobDto, @User() createdBy) {
-    return this.jobsService.create(createJobDto, createdBy);
+  create(@Body() createJobDto: CreateJobDto, @User() created_by) {
+    return this.jobsService.create(createJobDto, created_by);
   }
 
   @Public()
@@ -42,9 +42,9 @@ export class JobsController {
   update(
     @Param('id') id: string,
     @Body() updateJobDto: UpdateJobDto,
-    @User() updatedBy,
+    @User() updated_by,
   ) {
-    return this.jobsService.update(id, updateJobDto, updatedBy);
+    return this.jobsService.update(id, updateJobDto, updated_by);
   }
 
   @Delete(':id')

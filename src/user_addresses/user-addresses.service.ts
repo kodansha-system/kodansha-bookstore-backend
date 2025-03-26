@@ -22,7 +22,7 @@ export class UserAddressesService {
   async create(createUserAddressDto: CreateUserAddressDto, user: IUserBody) {
     const userAddress = await this.userAddressModel.create({
       ...createUserAddressDto,
-      createdBy: user._id,
+      created_by: user._id,
     });
 
     return {
@@ -65,7 +65,7 @@ export class UserAddressesService {
   async findOne(id: string) {
     return await this.userAddressModel.findById(id).populate([
       {
-        path: 'createdBy',
+        path: 'created_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -73,7 +73,7 @@ export class UserAddressesService {
         },
       },
       {
-        path: 'updatedBy',
+        path: 'updated_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -102,7 +102,7 @@ export class UserAddressesService {
   ) {
     const updateUserAddress = await this.userAddressModel.updateOne(
       { _id: id },
-      { ...updateUserAddressDto, updatedBy: user._id },
+      { ...updateUserAddressDto, updated_by: user._id },
     );
 
     return updateUserAddress;

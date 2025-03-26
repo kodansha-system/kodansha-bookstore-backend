@@ -17,7 +17,7 @@ export class RolesService {
     const role = await this.roleModel.create({
       is_active: false,
       ...createRoleDto,
-      createdBy: user,
+      created_by: user,
     });
 
     return {
@@ -67,7 +67,7 @@ export class RolesService {
   async update(id: string, updateRoleDto: UpdateRoleDto, user: IUser) {
     const updateRole = await this.roleModel.updateOne(
       { _id: id },
-      { ...updateRoleDto, updatedBy: user },
+      { ...updateRoleDto, updated_by: user },
     );
 
     return updateRole;

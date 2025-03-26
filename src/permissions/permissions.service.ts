@@ -16,7 +16,7 @@ export class PermissionsService {
   async create(createPermissionDto: CreatePermissionDto, user: IUser) {
     const permission = await this.permissionModel.create({
       ...createPermissionDto,
-      createdBy: user,
+      created_by: user,
     });
 
     return {
@@ -66,7 +66,7 @@ export class PermissionsService {
   ) {
     const updatePermission = await this.permissionModel.updateOne(
       { _id: id },
-      { ...updatePermissionDto, updatedBy: user },
+      { ...updatePermissionDto, updated_by: user },
     );
 
     return updatePermission;

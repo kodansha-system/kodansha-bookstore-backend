@@ -33,12 +33,12 @@ export class CreateJobDto {
   @IsNotEmpty()
   isActive: boolean;
 
-  createdBy: {
+  created_by: {
     _id: mongoose.Schema.Types.ObjectId;
     email: string;
   };
 
-  updatedBy: {
+  updated_by: {
     _id: mongoose.Schema.Types.ObjectId;
     email: string;
   };

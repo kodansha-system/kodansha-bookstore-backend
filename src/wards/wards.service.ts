@@ -17,7 +17,7 @@ export class WardsService {
   async create(createWardDto: CreateWardDto, user: IUserBody) {
     const ward = await this.wardModel.create({
       ...createWardDto,
-      createdBy: user._id,
+      created_by: user._id,
     });
 
     return {
@@ -60,7 +60,7 @@ export class WardsService {
   async findOne(id: string) {
     return await this.wardModel.findById(id).populate([
       {
-        path: 'createdBy',
+        path: 'created_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -68,7 +68,7 @@ export class WardsService {
         },
       },
       {
-        path: 'updatedBy',
+        path: 'updated_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -81,7 +81,7 @@ export class WardsService {
   async update(id: string, updateWardDto: UpdateWardDto, user: IUserBody) {
     const updateWard = await this.wardModel.updateOne(
       { _id: id },
-      { ...updateWardDto, updatedBy: user._id },
+      { ...updateWardDto, updated_by: user._id },
     );
 
     return updateWard;

@@ -30,7 +30,7 @@ export class CarriersService {
     const carrier = await this.carrierModel.create({
       ...createCarrierDto,
       image: image.url,
-      createdBy: user._id,
+      created_by: user._id,
     });
 
     return {
@@ -73,7 +73,7 @@ export class CarriersService {
   async findOne(id: string) {
     return await this.carrierModel.findById(id).populate([
       {
-        path: 'createdBy',
+        path: 'created_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -81,7 +81,7 @@ export class CarriersService {
         },
       },
       {
-        path: 'updatedBy',
+        path: 'updated_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -106,14 +106,14 @@ export class CarriersService {
 
       const updateCarrier = await this.carrierModel.updateOne(
         { _id: id },
-        { ...updateCarrierDto, image: image.url, updatedBy: user._id },
+        { ...updateCarrierDto, image: image.url, updated_by: user._id },
       );
 
       return updateCarrier;
     }
     const updateCarrier = await this.carrierModel.updateOne(
       { _id: id },
-      { ...updateCarrierDto, updatedBy: user._id },
+      { ...updateCarrierDto, updated_by: user._id },
     );
 
     return updateCarrier;

@@ -17,7 +17,7 @@ export class DistrictsService {
   async create(createDistrictDto: CreateDistrictDto, user: IUserBody) {
     const district = await this.districtModel.create({
       ...createDistrictDto,
-      createdBy: user._id,
+      created_by: user._id,
     });
 
     return {
@@ -60,7 +60,7 @@ export class DistrictsService {
   async findOne(id: string) {
     return await this.districtModel.findById(id).populate([
       {
-        path: 'createdBy',
+        path: 'created_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -68,7 +68,7 @@ export class DistrictsService {
         },
       },
       {
-        path: 'updatedBy',
+        path: 'updated_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -85,7 +85,7 @@ export class DistrictsService {
   ) {
     const updateDistrict = await this.districtModel.updateOne(
       { _id: id },
-      { ...updateDistrictDto, updatedBy: user._id },
+      { ...updateDistrictDto, updated_by: user._id },
     );
 
     return updateDistrict;

@@ -31,7 +31,7 @@ export class BannersService {
     const banner = await this.bannerModel.create({
       ...createBannerDto,
       image: image.url,
-      createdBy: user._id,
+      created_by: user._id,
     });
 
     return {
@@ -74,7 +74,7 @@ export class BannersService {
   async findOne(id: string) {
     return await this.bannerModel.findById(id).populate([
       {
-        path: 'createdBy',
+        path: 'created_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -82,7 +82,7 @@ export class BannersService {
         },
       },
       {
-        path: 'updatedBy',
+        path: 'updated_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -108,7 +108,7 @@ export class BannersService {
 
       const updateBanner = await this.bannerModel.updateOne(
         { _id: id },
-        { ...updateBannerDto, image: image.url, updatedBy: user._id },
+        { ...updateBannerDto, image: image.url, updated_by: user._id },
       );
 
       return updateBanner;
@@ -116,7 +116,7 @@ export class BannersService {
 
     const updateBanner = await this.bannerModel.updateOne(
       { _id: id },
-      { ...updateBannerDto, updatedBy: user._id },
+      { ...updateBannerDto, updated_by: user._id },
     );
 
     return updateBanner;

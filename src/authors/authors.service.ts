@@ -30,7 +30,7 @@ export class AuthorsService {
     const author = await this.authorModel.create({
       ...createAuthorDto,
       image: image.url,
-      createdBy: user._id,
+      created_by: user._id,
     });
 
     return {
@@ -73,7 +73,7 @@ export class AuthorsService {
   async findOne(id: string) {
     return await this.authorModel.findById(id).populate([
       {
-        path: 'createdBy',
+        path: 'created_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -81,7 +81,7 @@ export class AuthorsService {
         },
       },
       {
-        path: 'updatedBy',
+        path: 'updated_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -106,14 +106,14 @@ export class AuthorsService {
 
       const updateAuthor = await this.authorModel.updateOne(
         { _id: id },
-        { ...updateAuthorDto, image: image.url, updatedBy: user._id },
+        { ...updateAuthorDto, image: image.url, updated_by: user._id },
       );
 
       return updateAuthor;
     }
     const updateAuthor = await this.authorModel.updateOne(
       { _id: id },
-      { ...updateAuthorDto, updatedBy: user._id },
+      { ...updateAuthorDto, updated_by: user._id },
     );
 
     return updateAuthor;

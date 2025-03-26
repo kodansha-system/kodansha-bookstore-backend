@@ -9,10 +9,14 @@ import { TransformInterceptor } from './core/transform.interceptor';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import mongoose from 'mongoose';
+import { mongooseTransformPlugin } from './core/mongoose.transform';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('dotenv').config();
 
 async function bootstrap() {
+  mongoose.plugin(mongooseTransformPlugin);
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
   const reflector = app.get(Reflector);

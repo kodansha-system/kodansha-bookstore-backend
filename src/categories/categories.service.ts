@@ -30,7 +30,7 @@ export class CategoriesService {
     const category = await this.categoryModel.create({
       ...createCategoryDto,
       image: image.url,
-      createdBy: user._id,
+      created_by: user._id,
     });
 
     return {
@@ -73,7 +73,7 @@ export class CategoriesService {
   async findOne(id: string) {
     return await this.categoryModel.findById(id).populate([
       {
-        path: 'createdBy',
+        path: 'created_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -81,7 +81,7 @@ export class CategoriesService {
         },
       },
       {
-        path: 'updatedBy',
+        path: 'updated_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -106,14 +106,14 @@ export class CategoriesService {
 
       const updateCategory = await this.categoryModel.updateOne(
         { _id: id },
-        { ...updateCategoryDto, image: image.url, updatedBy: user._id },
+        { ...updateCategoryDto, image: image.url, updated_by: user._id },
       );
 
       return updateCategory;
     }
     const updateCategory = await this.categoryModel.updateOne(
       { _id: id },
-      { ...updateCategoryDto, updatedBy: user._id },
+      { ...updateCategoryDto, updated_by: user._id },
     );
 
     return updateCategory;

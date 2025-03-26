@@ -16,7 +16,7 @@ export class SubscribersService {
   async create(createSubscriberDto: CreateSubscriberDto, user: IUser) {
     const subscriber = await this.subscriberModel.create({
       ...createSubscriberDto,
-      createdBy: user,
+      created_by: user,
     });
 
     return {
@@ -63,7 +63,7 @@ export class SubscribersService {
   async update(updateSubscriberDto: UpdateSubscriberDto, user: IUserBody) {
     const updateSubscriber = await this.subscriberModel.updateOne(
       { email: user?.email },
-      { ...updateSubscriberDto, updatedBy: user },
+      { ...updateSubscriberDto, updated_by: user },
       { upsert: true },
     );
 

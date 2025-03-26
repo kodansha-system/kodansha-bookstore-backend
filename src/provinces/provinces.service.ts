@@ -17,7 +17,7 @@ export class ProvincesService {
   async create(createProvinceDto: CreateProvinceDto, user: IUserBody) {
     const province = await this.provinceModel.create({
       ...createProvinceDto,
-      createdBy: user._id,
+      created_by: user._id,
     });
 
     return {
@@ -60,7 +60,7 @@ export class ProvincesService {
   async findOne(id: string) {
     return await this.provinceModel.findById(id).populate([
       {
-        path: 'createdBy',
+        path: 'created_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -68,7 +68,7 @@ export class ProvincesService {
         },
       },
       {
-        path: 'updatedBy',
+        path: 'updated_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -85,7 +85,7 @@ export class ProvincesService {
   ) {
     const updateProvince = await this.provinceModel.updateOne(
       { _id: id },
-      { ...updateProvinceDto, updatedBy: user._id },
+      { ...updateProvinceDto, updated_by: user._id },
     );
 
     return updateProvince;

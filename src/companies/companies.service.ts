@@ -31,13 +31,13 @@ export class CompaniesService {
       company = await this.companyModel.create({
         ...createCompanyDto,
         logo: image.url,
-        createdBy: user,
+        created_by: user,
       });
     } else {
       company = await this.companyModel.create({
         ...createCompanyDto,
         logo: 'https://www.google.com/imgres?q=default%20image&imgurl=https%3A%2F%2Fcdn.vectorstock.com%2Fi%2Fpreview-1x%2F37%2F31%2Fdefault-paper-word-sign-with-colorful-spectrum-vector-48293731.jpg&imgrefurl=https%3A%2F%2Fwww.vectorstock.com%2Froyalty-free-vectors%2Fdefault-vectors&docid=FSLeHcyDKeIvXM&tbnid=Gg5ap9pNfRrm_M&vet=12ahUKEwjnu6aN1qSLAxWXOTQIHZmwHzQQM3oECF4QAA..i&w=508&h=250&hcb=2&ved=2ahUKEwjnu6aN1qSLAxWXOTQIHZmwHzQQM3oECF4QAA',
-        createdBy: user,
+        created_by: user,
       });
     }
 
@@ -98,12 +98,12 @@ export class CompaniesService {
 
       updateCompany = await this.companyModel.updateOne(
         { _id: id },
-        { ...updateCompanyDto, logo: image.url, updatedBy: user },
+        { ...updateCompanyDto, logo: image.url, updated_by: user },
       );
     } else {
       updateCompany = await this.companyModel.updateOne(
         { _id: id },
-        { ...updateCompanyDto, updatedBy: user },
+        { ...updateCompanyDto, updated_by: user },
       );
     }
 

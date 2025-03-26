@@ -23,13 +23,13 @@ export class ResumesService {
         {
           status: 'PENDING',
           updatedAt: new Date(),
-          updatedBy: {
+          updated_by: {
             email: user?.email,
             _id: user?._id,
           },
         },
       ],
-      createdBy: user,
+      created_by: user,
     });
 
     return resume;
@@ -77,14 +77,14 @@ export class ResumesService {
     newHistory.push({
       status: updateResumeDto?.status || 'PENDING',
       updatedAt: new Date(),
-      updatedBy: {
+      updated_by: {
         _id: user?._id as any,
         email: user?.email,
       },
     });
     const updateResume = await this.resumeModel.updateOne(
       { _id: id },
-      { ...updateResumeDto, history: newHistory, updatedBy: user },
+      { ...updateResumeDto, history: newHistory, updated_by: user },
     );
 
     return updateResume;

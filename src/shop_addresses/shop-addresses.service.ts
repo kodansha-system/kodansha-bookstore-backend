@@ -34,7 +34,7 @@ export class ShopAddressesService {
     const shopAddress = await this.shopAddressModel.create({
       ...createShopAddressDto,
       image: image.url,
-      createdBy: user._id,
+      created_by: user._id,
     });
 
     return {
@@ -77,7 +77,7 @@ export class ShopAddressesService {
   async findOne(id: string) {
     return await this.shopAddressModel.findById(id).populate([
       {
-        path: 'createdBy',
+        path: 'created_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -85,7 +85,7 @@ export class ShopAddressesService {
         },
       },
       {
-        path: 'updatedBy',
+        path: 'updated_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -123,7 +123,7 @@ export class ShopAddressesService {
 
       const updateShopAddress = await this.shopAddressModel.updateOne(
         { _id: id },
-        { ...updateShopAddressDto, image: image.url, updatedBy: user._id },
+        { ...updateShopAddressDto, image: image.url, updated_by: user._id },
       );
 
       return updateShopAddress;
@@ -131,7 +131,7 @@ export class ShopAddressesService {
 
     const updateShopAddress = await this.shopAddressModel.updateOne(
       { _id: id },
-      { ...updateShopAddressDto, updatedBy: user._id },
+      { ...updateShopAddressDto, updated_by: user._id },
     );
 
     return updateShopAddress;

@@ -25,7 +25,7 @@ export class UsersService {
 
   async createNewUser(
     createUserDto: CreateUserDto,
-    createdBy: IUser,
+    created_by: IUser,
     file?: Express.Multer.File,
   ) {
     const { password } = createUserDto;
@@ -45,13 +45,13 @@ export class UsersService {
           `user${crypto.randomUUID().substring(0, 8)}`,
         password: hashPassword,
         image: image.url,
-        createdBy,
+        created_by,
       });
 
       return {
         _id: user?._id,
         createdAt: user?.createdAt,
-        createdBy: user?.createdBy,
+        created_by: user?.created_by,
       };
     }
 
@@ -60,13 +60,13 @@ export class UsersService {
       username:
         createUserDto.username || `user${crypto.randomUUID().substring(0, 8)}`,
       password: hashPassword,
-      createdBy,
+      created_by,
     });
 
     return {
       _id: user?._id,
       createdAt: user?.createdAt,
-      createdBy: user?.createdBy,
+      created_by: user?.created_by,
     };
   }
 
@@ -129,7 +129,7 @@ export class UsersService {
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
-    updatedBy: IUser,
+    updated_by: IUser,
     file?: Express.Multer.File,
   ) {
     const user: any = await this.userModel.findById(id);
@@ -150,7 +150,7 @@ export class UsersService {
             ...updateUserDto,
             password: hashPassword,
             image: image.url,
-            updatedBy,
+            updated_by,
           },
         );
 
@@ -162,7 +162,7 @@ export class UsersService {
         {
           ...updateUserDto,
           password: hashPassword,
-          updatedBy,
+          updated_by,
         },
       );
 
@@ -172,7 +172,7 @@ export class UsersService {
         { _id: user?._doc?._id },
         {
           ...updateUserDto,
-          updatedBy,
+          updated_by,
         },
       );
 

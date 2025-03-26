@@ -8,7 +8,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/companies',
     method: 'GET',
     module: 'COMPANIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -17,7 +17,7 @@ export const INIT_PERMISSIONS = [
     createdAt: '2023-06-15T06:47:49.369Z',
     updatedAt: '2023-06-15T06:54:05.131Z',
     __v: 0,
-    updatedBy: {
+    updated_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -28,7 +28,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/companies',
     method: 'POST',
     module: 'COMPANIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -44,7 +44,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/companies/:id',
     method: 'PATCH',
     module: 'COMPANIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -60,7 +60,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/companies/:id',
     method: 'DELETE',
     module: 'COMPANIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -76,7 +76,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/companies/:id',
     method: 'GET',
     module: 'COMPANIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -92,7 +92,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/users',
     method: 'POST',
     module: 'USERS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -108,7 +108,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/users/:id',
     method: 'GET',
     module: 'USERS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -124,7 +124,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/users',
     method: 'GET',
     module: 'USERS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -140,7 +140,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/users/:id',
     method: 'PATCH',
     module: 'USERS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -156,7 +156,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/users/:id',
     method: 'DELETE',
     module: 'USERS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -172,7 +172,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/files/upload',
     method: 'POST',
     module: 'FILES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -188,7 +188,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/jobs',
     method: 'POST',
     module: 'JOBS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -204,7 +204,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/jobs/:id',
     method: 'GET',
     module: 'JOBS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -220,7 +220,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/jobs/:id',
     method: 'PATCH',
     module: 'JOBS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -236,7 +236,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/jobs',
     method: 'GET',
     module: 'JOBS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -252,7 +252,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/jobs/:id',
     method: 'DELETE',
     module: 'JOBS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -268,7 +268,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/resumes',
     method: 'POST',
     module: 'RESUMES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -284,7 +284,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/resumes',
     method: 'GET',
     module: 'RESUMES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -300,7 +300,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/resumes/:id',
     method: 'GET',
     module: 'RESUMES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -316,7 +316,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/resumes/:id',
     method: 'DELETE',
     module: 'RESUMES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -332,7 +332,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/resumes/:id',
     method: 'PATCH',
     module: 'RESUMES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -348,7 +348,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/resumes/by-user',
     method: 'POST',
     module: 'RESUMES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -364,7 +364,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/permissions',
     method: 'POST',
     module: 'PERMISSIONS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -380,7 +380,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/permissions',
     method: 'GET',
     module: 'PERMISSIONS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -396,7 +396,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/permissions/:id',
     method: 'GET',
     module: 'PERMISSIONS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -412,7 +412,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/permissions/:id',
     method: 'PATCH',
     module: 'PERMISSIONS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -428,7 +428,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/permissions/:id',
     method: 'DELETE',
     module: 'PERMISSIONS',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -444,7 +444,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/roles',
     method: 'POST',
     module: 'ROLES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -460,7 +460,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/roles',
     method: 'GET',
     module: 'ROLES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -476,7 +476,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/roles/:id',
     method: 'GET',
     module: 'ROLES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -492,7 +492,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/roles/:id',
     method: 'PATCH',
     module: 'ROLES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -508,7 +508,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/roles/:id',
     method: 'DELETE',
     module: 'ROLES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -523,7 +523,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/categories',
     method: 'POST',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -538,7 +538,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/categories',
     method: 'GET',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -553,7 +553,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/categories/:id',
     method: 'GET',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -568,7 +568,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/categories/:id',
     method: 'PATCH',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -583,7 +583,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/categories/:id',
     method: 'DELETE',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -599,7 +599,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/books',
     method: 'POST',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -614,7 +614,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/books',
     method: 'GET',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -629,7 +629,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/books/:id',
     method: 'GET',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -644,7 +644,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/books/:id',
     method: 'PATCH',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -659,7 +659,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/books/:id',
     method: 'DELETE',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -675,7 +675,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/authors',
     method: 'POST',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -690,7 +690,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/authors',
     method: 'GET',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -705,7 +705,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/authors/:id',
     method: 'GET',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -720,7 +720,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/authors/:id',
     method: 'PATCH',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },
@@ -735,7 +735,7 @@ export const INIT_PERMISSIONS = [
     api_path: '/api/v1/authors/:id',
     method: 'DELETE',
     module: 'CATEGORIES',
-    createdBy: {
+    created_by: {
       _id: '647b5108a8a243e8191855b5',
       email: 'hoidanit@gmail.com',
     },

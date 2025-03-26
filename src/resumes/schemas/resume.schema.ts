@@ -30,20 +30,20 @@ export class Resume {
   history: {
     status: string;
     updatedAt: Date;
-    updatedBy: {
+    updated_by: {
       _id: mongoose.Schema.Types.ObjectId;
       email: string;
     };
   }[];
 
   @Prop({ type: Object })
-  createdBy: {
+  created_by: {
     _id: mongoose.Schema.Types.ObjectId;
     email: string;
   };
 
   @Prop({ type: Object })
-  updatedBy: {
+  updated_by: {
     _id: mongoose.Schema.Types.ObjectId;
     email: string;
   };

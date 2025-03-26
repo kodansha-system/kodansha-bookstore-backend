@@ -39,7 +39,7 @@ export class BooksService {
     const book = await this.bookModel.create({
       ...createBookDto,
       images: uploadedImages.map((img) => img.url),
-      createdBy: user._id,
+      created_by: user._id,
     });
 
     return {
@@ -82,7 +82,7 @@ export class BooksService {
   async findOne(id: string) {
     return await this.bookModel.findById(id).populate([
       {
-        path: 'createdBy',
+        path: 'created_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -90,7 +90,7 @@ export class BooksService {
         },
       },
       {
-        path: 'updatedBy',
+        path: 'updated_by',
         select: '_id name role',
         populate: {
           path: 'role',
@@ -129,7 +129,7 @@ export class BooksService {
       const books = await this.bookModel.create({
         ...updateBookDto,
         images: uploadedImages.map((img) => img.url),
-        updatedBy: user._id,
+        updated_by: user._id,
       });
 
       return books;
@@ -137,7 +137,7 @@ export class BooksService {
 
     const updateBook = await this.bookModel.updateOne(
       { _id: id },
-      { ...updateBookDto, updatedBy: user._id },
+      { ...updateBookDto, updated_by: user._id },
     );
 
     return updateBook;

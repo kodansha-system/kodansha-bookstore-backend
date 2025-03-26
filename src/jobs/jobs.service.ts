@@ -14,8 +14,8 @@ export class JobsService {
     private jobModel: SoftDeleteModel<JobDocument>,
   ) {}
 
-  async create(createJobDto: CreateJobDto, createdBy: IUser) {
-    const job = await this.jobModel.create({ ...createJobDto, createdBy });
+  async create(createJobDto: CreateJobDto, created_by: IUser) {
+    const job = await this.jobModel.create({ ...createJobDto, created_by });
     return job;
   }
 
@@ -55,10 +55,10 @@ export class JobsService {
     return job;
   }
 
-  async update(id: string, updateJobDto: UpdateJobDto, updatedBy: IUser) {
+  async update(id: string, updateJobDto: UpdateJobDto, updated_by: IUser) {
     const job = await this.jobModel.updateOne(
       { _id: id },
-      { ...updateJobDto, updatedBy },
+      { ...updateJobDto, updated_by },
     );
     return job;
   }

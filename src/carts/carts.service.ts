@@ -17,7 +17,7 @@ export class CartsService {
     const cart = await this.cartModel.create({
       ...createCartDto,
       user_id: user?._id,
-      createdBy: user,
+      created_by: user,
     });
 
     return {

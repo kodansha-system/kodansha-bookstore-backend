@@ -9,10 +9,10 @@ export class Province {
   name: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  createdBy: mongoose.Schema.Types.ObjectId;
+  created_by: mongoose.Schema.Types.ObjectId;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  updatedBy: mongoose.Schema.Types.ObjectId;
+  updated_by: mongoose.Schema.Types.ObjectId;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   deletedBy: mongoose.Schema.Types.ObjectId;

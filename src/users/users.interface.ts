@@ -4,11 +4,13 @@ export interface IUser {
 
 export interface IUserBody {
   _id: string;
+  id: string;
   name: string;
   email: string;
   facebook_id: string;
   role: {
     _id: string;
+    id: string;
     name: string;
   };
   permissions: {

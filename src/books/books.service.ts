@@ -7,6 +7,7 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import { FilesService } from 'src/files/files.service';
+import mongoose, { mongo } from 'mongoose';
 @Injectable()
 export class BooksService {
   constructor(
@@ -49,12 +50,14 @@ export class BooksService {
 
   async findAll(query) {
     const { filter, sort, population, projection } = aqp(query);
-
     const offset = (+filter?.current - 1) * filter?.pageSize;
     const defaultLimit = +filter?.pageSize || 10;
 
     delete filter?.current;
     delete filter?.pageSize;
+
+    if (filter.category_id)
+      filter.category_id = new mongoose.Types.ObjectId(filter?.category_id);
 
     const totalItems = (await this.bookModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
@@ -64,7 +67,12 @@ export class BooksService {
       .skip(offset)
       .limit(defaultLimit)
       .sort(sort as any)
-      .populate(population)
+      .populate([
+        {
+          path: 'authors',
+          select: 'name',
+        },
+      ])
       .select(projection)
       .exec();
 

@@ -34,6 +34,8 @@ import { WardsModule } from './wards/wards.module';
 import { CartsModule } from './carts/carts.module';
 import { CarriersModule } from './carriers/carriers.module';
 import { OrdersModule } from './orders/orders.module';
+import { VouchersModule } from './vouchers/vouchers.module';
+import { PayMethodsModule } from './paymethods/paymethods.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -97,6 +99,10 @@ import { OrdersModule } from './orders/orders.module';
     CarriersModule,
 
     OrdersModule,
+
+    VouchersModule,
+
+    PayMethodsModule,
 
     ScheduleModule.forRoot(),
 

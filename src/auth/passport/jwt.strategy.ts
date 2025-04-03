@@ -20,7 +20,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: IUserBody) {
     const { _id, email, name, role, facebook_id } = payload;
-    const temp = await this.roleService.findOne(role?._id);
+    console.log({ role });
+    const temp = await this.roleService.findOne(role?.id);
     return {
       _id,
       email,

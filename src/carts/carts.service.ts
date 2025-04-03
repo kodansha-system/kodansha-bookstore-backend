@@ -14,15 +14,39 @@ export class CartsService {
   ) {}
 
   async create(createCartDto: CreateCartDto, user: IUserBody) {
-    const cart = await this.cartModel.create({
-      ...createCartDto,
-      user_id: user?._id,
-      created_by: user,
-    });
+    const {
+      books: [newBook],
+    } = createCartDto; // Lấy phần tử duy nhất trong books
 
-    return {
-      cart,
-    };
+    // Kiểm tra giỏ hàng của user có tồn tại không
+    let cart = await this.cartModel.findOne({ user_id: user._id });
+
+    if (cart) {
+      // Tìm quyển sách trong giỏ hàng
+      const existingBook = cart.books.find(
+        (book) => book.book_id.toString() === newBook.book_id.toString(),
+      );
+
+      if (existingBook) {
+        // Nếu sách đã tồn tại, cộng dồn quantity
+        existingBook.quantity += newBook.quantity;
+      } else {
+        // Nếu sách chưa có, thêm mới vào giỏ hàng
+        cart.books.push(newBook);
+      }
+
+      // Lưu cập nhật giỏ hàng
+      await cart.save();
+    } else {
+      // Nếu chưa có giỏ hàng, tạo mới với quyển sách này
+      cart = await this.cartModel.create({
+        user_id: user._id,
+        books: [newBook], // Chỉ có 1 quyển sách
+        created_by: user,
+      });
+    }
+
+    return { cart };
   }
 
   async findAll(query) {
@@ -42,7 +66,16 @@ export class CartsService {
       .skip(offset)
       .limit(defaultLimit)
       .sort(sort as any)
-      .populate(population)
+      .populate({
+        path: 'books.book_id',
+        select: {
+          name: 1,
+          images: 1,
+          price: 1,
+          rating_average: 1,
+          discount: 1,
+        },
+      })
       .select(projection)
       .exec();
 
@@ -58,13 +91,22 @@ export class CartsService {
   }
 
   async findOne(id: string) {
-    return await this.cartModel.findById(id).populate({
+    return await this.cartModel.findOne({ user_id: id }).populate({
       path: 'books.book_id',
-      select: { name: 1, images: 1, price: 1, rating_average: 1 },
+      select: { name: 1, images: 1, price: 1, rating_average: 1, discount: 1 },
     });
   }
 
-  async update(id: string, updateCartDto: UpdateCartDto, user: IUserBody) {
+  async getCartByUserId(user_id: string) {
+    const cart = await this.cartModel.findOne({ user_id }).populate({
+      path: 'books.book_id',
+      select: { name: 1, images: 1, price: 1, rating_average: 1, discount: 1 },
+    });
+    console.log(cart);
+    return cart;
+  }
+
+  async update(updateCartDto: UpdateCartDto, user: IUserBody) {
     try {
       return await this.cartModel.updateOne(
         { user_id: user._id },

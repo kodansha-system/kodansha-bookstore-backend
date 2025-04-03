@@ -25,26 +25,21 @@ export class CartsController {
     return this.cartsService.create(createCartDto, user);
   }
 
-  @Public()
   @ResponseMessage('Lấy danh sách giỏ hàng thành công')
   @Get()
   findAll(@Query() query) {
     return this.cartsService.findAll(query);
   }
 
-  @Public()
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cartsService.findOne(id);
+  @Get('/user')
+  findOne(@User() user: IUserBody) {
+    console.log(user._id, 'check user');
+    return this.cartsService.getCartByUserId(user._id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateCartDto: UpdateCartDto,
-    @User() user: IUserBody,
-  ) {
-    return this.cartsService.update(id, updateCartDto, user);
+  @Patch()
+  update(@Body() updateCartDto: UpdateCartDto, @User() user: IUserBody) {
+    return this.cartsService.update(updateCartDto, user);
   }
 
   @Delete(':id')

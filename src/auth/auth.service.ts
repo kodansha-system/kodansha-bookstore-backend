@@ -41,7 +41,7 @@ export class AuthService {
         user.toObject().password,
       );
       if (isValid) {
-        const temp = await this.rolesService.findOne(user?.role?._id);
+        const temp = await this.rolesService.findOne(user?.role?.id);
         const { password, ...result } = user;
         return { ...result, permissions: temp?.permissions };
       }

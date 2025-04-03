@@ -35,34 +35,34 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     status?: any,
   ): TUser {
     try {
-      const skipCheckPermission = this.reflector.getAllAndOverride<boolean>(
-        IS_SKIP_CHECK_PERMISSION,
-        [context.getHandler(), context.getClass()],
-      );
-      if (skipCheckPermission) {
-        return user;
-      }
-      const request = context.switchToHttp().getRequest();
-      const currPath = request?.route?.path;
-      const currMethod = request?.method;
+      // const skipCheckPermission = this.reflector.getAllAndOverride<boolean>(
+      //   IS_SKIP_CHECK_PERMISSION,
+      //   [context.getHandler(), context.getClass()],
+      // );
+      // if (skipCheckPermission) {
+      //   return user;
+      // }
+      // const request = context.switchToHttp().getRequest();
+      // const currPath = request?.route?.path;
+      // const currMethod = request?.method;
 
-      let hasPermission = user?.permissions?.find(({ api_path, method }) => {
-        return api_path === currPath && method === currMethod;
-      });
+      // let hasPermission = user?.permissions?.find(({ api_path, method }) => {
+      //   return api_path === currPath && method === currMethod;
+      // });
 
-      const authRegex = /^\/api\/v1\/auth(\/|$)/;
+      // const authRegex = /^\/api\/v1\/auth(\/|$)/;
 
-      if (authRegex.test(currPath)) {
-        hasPermission = true;
-      }
+      // if (authRegex.test(currPath)) {
+      //   hasPermission = true;
+      // }
 
-      if (!hasPermission) {
-        throw err || new UnauthorizedException('Không có quyền vào route này');
-      }
+      // if (!hasPermission) {
+      //   throw err || new UnauthorizedException('Không có quyền vào route này');
+      // }
 
-      if (err || !user) {
-        throw err || new UnauthorizedException('Token không hợp lệ');
-      }
+      // if (err || !user) {
+      //   throw err || new UnauthorizedException('Token không hợp lệ');
+      // }
 
       return user;
     } catch (err) {

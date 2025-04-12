@@ -32,10 +32,28 @@ export class OrdersController {
     return this.ordersService.findAll(query);
   }
 
-  @Public()
+  @Get('/my-order')
+  findUserOrder(@Query() query, @User() user: IUserBody) {
+    console.log(user?._id);
+    return this.ordersService.findUserOrder(user?._id, query);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.ordersService.findOne(id);
+  }
+
+  @Patch('/status/:id')
+  updateOrderStatus(
+    @Param('id') id: string,
+    @Body() updateOrderDto: { status: number },
+    @User() user: IUserBody,
+  ) {
+    return this.ordersService.updateOrderStatus(
+      id,
+      updateOrderDto.status,
+      user,
+    );
   }
 
   @Patch(':id')

@@ -60,9 +60,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       //   throw err || new UnauthorizedException('Không có quyền vào route này');
       // }
 
-      // if (err || !user) {
-      //   throw err || new UnauthorizedException('Token không hợp lệ');
-      // }
+      if (err || !user) {
+        throw err || new UnauthorizedException('Token không hợp lệ');
+      }
 
       return user;
     } catch (err) {

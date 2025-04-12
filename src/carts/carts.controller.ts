@@ -33,7 +33,6 @@ export class CartsController {
 
   @Get('/user')
   findOne(@User() user: IUserBody) {
-    console.log(user._id, 'check user');
     return this.cartsService.getCartByUserId(user._id);
   }
 

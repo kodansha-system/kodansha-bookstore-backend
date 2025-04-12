@@ -36,6 +36,7 @@ import { CarriersModule } from './carriers/carriers.module';
 import { OrdersModule } from './orders/orders.module';
 import { VouchersModule } from './vouchers/vouchers.module';
 import { PayMethodsModule } from './paymethods/paymethods.module';
+import { WebhookModule } from './shipping/shipping.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -103,6 +104,8 @@ import { PayMethodsModule } from './paymethods/paymethods.module';
     VouchersModule,
 
     PayMethodsModule,
+
+    WebhookModule,
 
     ScheduleModule.forRoot(),
 

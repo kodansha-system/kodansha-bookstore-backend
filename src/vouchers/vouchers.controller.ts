@@ -25,6 +25,11 @@ export class VouchersController {
     return this.vouchersService.create(createVoucherDto, user);
   }
 
+  @Post('/get-list-voucher-for-order')
+  getListVoucherForOrder(@Body() order: any) {
+    return this.vouchersService.getListVoucherForOrder(order);
+  }
+
   @Public()
   @ResponseMessage('Lấy danh sách mã giảm giá thành công')
   @Get()

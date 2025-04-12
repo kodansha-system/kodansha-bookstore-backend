@@ -11,6 +11,9 @@ export class PayMethod {
   name: string;
 
   @Prop()
+  code: string;
+
+  @Prop()
   image: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })

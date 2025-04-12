@@ -17,7 +17,6 @@ export class CartsService {
     const {
       books: [newBook],
     } = createCartDto; // Lấy phần tử duy nhất trong books
-
     // Kiểm tra giỏ hàng của user có tồn tại không
     let cart = await this.cartModel.findOne({ user_id: user._id });
 
@@ -102,7 +101,6 @@ export class CartsService {
       path: 'books.book_id',
       select: { name: 1, images: 1, price: 1, rating_average: 1, discount: 1 },
     });
-    console.log(cart);
     return cart;
   }
 

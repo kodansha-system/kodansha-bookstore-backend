@@ -19,8 +19,6 @@ export class BookItemDto {
 }
 
 export class CreateCartDto {
-  user_id: Types.ObjectId;
-
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => BookItemDto)

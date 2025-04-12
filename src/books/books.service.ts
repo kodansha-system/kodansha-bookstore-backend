@@ -22,8 +22,6 @@ export class BooksService {
     user: IUserBody,
     files: Express.Multer.File[],
   ) {
-    console.log(createBookDto, 'check create');
-
     if (!files || files.length === 0) {
       throw new BadRequestException('No images uploaded.');
     }
@@ -122,8 +120,6 @@ export class BooksService {
     user: IUserBody,
     files?: Express.Multer.File[],
   ) {
-    console.log(updateBookDto, 'check');
-
     if (files) {
       const uploadedImages = await Promise.all(
         files.map(async (file) => {

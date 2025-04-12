@@ -24,6 +24,18 @@ export class VouchersService {
     };
   }
 
+  async getListVoucherForOrder(order) {
+    try {
+      const vouchers = await this.voucherModel.find({
+        min_order_total_price: { $lt: order.price },
+      });
+
+      return vouchers;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async findAll(query) {
     const { filter, sort, population, projection } = aqp(query);
 

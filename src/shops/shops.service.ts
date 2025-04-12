@@ -1,44 +1,40 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateShopAddressDto } from './dto/create-shop-address.dto';
-import { UpdateShopAddressDto } from './dto/update-shop-address.dto';
+import { CreateShopDto } from './dto/create-shop.dto';
+import { UpdateShopDto } from './dto/update-shop.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  ShopAddress,
-  ShopAddressDocument,
-} from './schemas/shop-address.schema';
+import { Shop, ShopDocument } from './schemas/shop.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import { FilesService } from 'src/files/files.service';
 @Injectable()
-export class ShopAddressesService {
+export class ShopsService {
   constructor(
-    @InjectModel(ShopAddress.name)
-    private shopAddressModel: SoftDeleteModel<ShopAddressDocument>,
+    @InjectModel(Shop.name)
+    private shopModel: SoftDeleteModel<ShopDocument>,
 
     private fileService: FilesService,
   ) {}
 
   async create(
-    createShopAddressDto: CreateShopAddressDto,
+    createShopDto: CreateShopDto,
     user: IUserBody,
     file: Express.Multer.File,
   ) {
     this.fileService.validateFile(file);
 
-    const image = await this.fileService.uploadImage(file).catch((e) => {
-      console.log(e);
-      throw new BadRequestException('Có lỗi xảy ra khi tải file');
+    const image = await this.fileService.uploadImage(file).catch(() => {
+      throw new BadRequestException('Invalid file type.');
     });
 
-    const shopAddress = await this.shopAddressModel.create({
-      ...createShopAddressDto,
-      image: image.url,
+    const shop = await this.shopModel.create({
+      ...createShopDto,
+      image: image?.url,
       created_by: user._id,
     });
 
     return {
-      shopAddress,
+      shop,
     };
   }
 
@@ -51,10 +47,10 @@ export class ShopAddressesService {
     delete filter?.current;
     delete filter?.pageSize;
 
-    const totalItems = (await this.shopAddressModel.find(filter)).length;
+    const totalItems = (await this.shopModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    const result = await this.shopAddressModel
+    const result = await this.shopModel
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
@@ -70,12 +66,12 @@ export class ShopAddressesService {
         totalItems,
         totalPages,
       },
-      shopAddresses: result,
+      shops: result,
     };
   }
 
   async findOne(id: string) {
-    return await this.shopAddressModel.findById(id).populate([
+    return await this.shopModel.findById(id).populate([
       {
         path: 'created_by',
         select: '_id name role',
@@ -109,36 +105,26 @@ export class ShopAddressesService {
 
   async update(
     id: string,
-    updateShopAddressDto: UpdateShopAddressDto,
+    updateShopDto: UpdateShopDto,
     user: IUserBody,
-    file?: Express.Multer.File,
+    file: Express.Multer.File,
   ) {
-    if (file) {
-      this.fileService.validateFile(file);
+    this.fileService.validateFile(file);
 
-      const image = await this.fileService.uploadImage(file).catch((e) => {
-        console.log(e);
-        throw new BadRequestException('Có lỗi xảy ra khi tải file');
-      });
+    const image = await this.fileService.uploadImage(file).catch(() => {
+      throw new BadRequestException('Invalid file type.');
+    });
 
-      const updateShopAddress = await this.shopAddressModel.updateOne(
-        { _id: id },
-        { ...updateShopAddressDto, image: image.url, updated_by: user._id },
-      );
-
-      return updateShopAddress;
-    }
-
-    const updateShopAddress = await this.shopAddressModel.updateOne(
+    const updateShop = await this.shopModel.updateOne(
       { _id: id },
-      { ...updateShopAddressDto, updated_by: user._id },
+      { ...updateShopDto, image: image?.url, updated_by: user._id },
     );
 
-    return updateShopAddress;
+    return updateShop;
   }
 
   remove(id: string, user: IUserBody) {
-    return this.shopAddressModel.updateOne(
+    return this.shopModel.updateOne(
       { _id: id },
       {
         deletedBy: user._id,

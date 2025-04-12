@@ -21,14 +21,11 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { HealthModule } from './health/health.module';
 import { AcceptLanguageResolver, I18nModule } from 'nestjs-i18n';
 import path from 'path';
-import { loadTranslationsFromExcel } from './i18n/excel-loader';
 import { AuthorsModule } from './authors/authors.module';
 import { CategoriesModule } from './categories/categories.module';
 import { BooksModule } from './books/books.module';
 import { BannersModule } from './banners/banners.module';
-import { ShopAddressesModule } from './shop_addresses/shop-addresses.module';
 import { ProvincesModule } from './provinces/provinces.module';
-import { UserAddressesModule } from './user_addresses/user-addresses.module';
 import { DistrictsModule } from './districts/districts.module';
 import { WardsModule } from './wards/wards.module';
 import { CartsModule } from './carts/carts.module';
@@ -37,6 +34,8 @@ import { OrdersModule } from './orders/orders.module';
 import { VouchersModule } from './vouchers/vouchers.module';
 import { PayMethodsModule } from './paymethods/paymethods.module';
 import { WebhookModule } from './shipping/shipping.module';
+import { ShopBooksModule } from './shop_books/shop-books.module';
+import { ShopsModule } from './shops/shops.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -85,10 +84,6 @@ import { WebhookModule } from './shipping/shipping.module';
 
     BannersModule,
 
-    ShopAddressesModule,
-
-    UserAddressesModule,
-
     ProvincesModule,
 
     DistrictsModule,
@@ -106,6 +101,10 @@ import { WebhookModule } from './shipping/shipping.module';
     PayMethodsModule,
 
     WebhookModule,
+
+    ShopsModule,
+
+    ShopBooksModule,
 
     ScheduleModule.forRoot(),
 

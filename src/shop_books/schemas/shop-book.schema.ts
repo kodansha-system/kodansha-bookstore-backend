@@ -1,33 +1,18 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
-export type ShopAddressDocument = HydratedDocument<ShopAddress>;
+export type ShopBookDocument = HydratedDocument<ShopBook>;
 
 @Schema({ timestamps: true })
-export class ShopAddress {
+export class ShopBook {
   @Prop()
-  name: string;
+  quantity: number;
 
-  @Prop()
-  phone: string;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ShopS' })
+  shop_id: mongoose.Types.ObjectId;
 
-  @Prop()
-  address: string;
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Wards' })
-  ward: mongoose.Types.ObjectId;
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Districts' })
-  district: mongoose.Types.ObjectId;
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Province' })
-  province: mongoose.Types.ObjectId;
-
-  @Prop()
-  longitude: number;
-
-  @Prop()
-  latitude: number;
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Books' })
+  book_id: mongoose.Types.ObjectId;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   created_by: mongoose.Schema.Types.ObjectId;
@@ -51,4 +36,4 @@ export class ShopAddress {
   deletedAt: Date;
 }
 
-export const ShopAddressSchema = SchemaFactory.createForClass(ShopAddress);
+export const ShopBookSchema = SchemaFactory.createForClass(ShopBook);

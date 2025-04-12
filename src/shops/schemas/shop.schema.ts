@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
-export type UserAddressDocument = HydratedDocument<UserAddress>;
+export type ShopDocument = HydratedDocument<Shop>;
 
 @Schema({ timestamps: true })
-export class UserAddress {
+export class Shop {
   @Prop()
   phone: string;
 
@@ -12,15 +12,19 @@ export class UserAddress {
   address: string;
 
   @Prop()
-  // @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Wards' })
-  ward: mongoose.Types.ObjectId;
+  ward: string;
 
   @Prop()
-  // @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Districts' })
-  district: mongoose.Types.ObjectId;
+  district: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Province' })
-  province: mongoose.Types.ObjectId;
+  @Prop()
+  province: string;
+
+  @Prop()
+  longitude: string;
+
+  @Prop()
+  latitude: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   created_by: mongoose.Schema.Types.ObjectId;
@@ -44,4 +48,4 @@ export class UserAddress {
   deletedAt: Date;
 }
 
-export const UserAddressSchema = SchemaFactory.createForClass(UserAddress);
+export const ShopSchema = SchemaFactory.createForClass(Shop);

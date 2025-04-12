@@ -1,32 +1,27 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserAddressDto } from './dto/create-user-address.dto';
-import { UpdateUserAddressDto } from './dto/update-user-address.dto';
+import { CreateShopBookDto } from './dto/create-shop-book.dto';
+import { UpdateShopBookDto } from './dto/update-shop-book.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import {
-  UserAddress,
-  UserAddressDocument,
-} from './schemas/user-address.schema';
+import { ShopBook, ShopBookDocument } from './schemas/shop-book.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import { FilesService } from 'src/files/files.service';
 @Injectable()
-export class UserAddressesService {
+export class ShopBooksService {
   constructor(
-    @InjectModel(UserAddress.name)
-    private userAddressModel: SoftDeleteModel<UserAddressDocument>,
-
-    private fileService: FilesService,
+    @InjectModel(ShopBook.name)
+    private shopBookModel: SoftDeleteModel<ShopBookDocument>,
   ) {}
 
-  async create(createUserAddressDto: CreateUserAddressDto, user: IUserBody) {
-    const userAddress = await this.userAddressModel.create({
-      ...createUserAddressDto,
+  async create(createShopBookDto: CreateShopBookDto, user: IUserBody) {
+    const shopBook = await this.shopBookModel.create({
+      ...createShopBookDto,
       created_by: user._id,
     });
 
     return {
-      userAddress,
+      shopBook,
     };
   }
 
@@ -39,10 +34,10 @@ export class UserAddressesService {
     delete filter?.current;
     delete filter?.pageSize;
 
-    const totalItems = (await this.userAddressModel.find(filter)).length;
+    const totalItems = (await this.shopBookModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    const result = await this.userAddressModel
+    const result = await this.shopBookModel
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
@@ -58,12 +53,12 @@ export class UserAddressesService {
         totalItems,
         totalPages,
       },
-      userAddresses: result,
+      shopBooks: result,
     };
   }
 
   async findOne(id: string) {
-    return await this.userAddressModel.findById(id).populate([
+    return await this.shopBookModel.findById(id).populate([
       {
         path: 'created_by',
         select: '_id name role',
@@ -97,19 +92,29 @@ export class UserAddressesService {
 
   async update(
     id: string,
-    updateUserAddressDto: UpdateUserAddressDto,
+    updateShopBookDto: UpdateShopBookDto,
     user: IUserBody,
+    file?: Express.Multer.File,
   ) {
-    const updateUserAddress = await this.userAddressModel.updateOne(
+    if (file) {
+      const updateShopBook = await this.shopBookModel.updateOne(
+        { _id: id },
+        { ...updateShopBookDto, updated_by: user._id },
+      );
+
+      return updateShopBook;
+    }
+
+    const updateShopBook = await this.shopBookModel.updateOne(
       { _id: id },
-      { ...updateUserAddressDto, updated_by: user._id },
+      { ...updateShopBookDto, updated_by: user._id },
     );
 
-    return updateUserAddress;
+    return updateShopBook;
   }
 
   remove(id: string, user: IUserBody) {
-    return this.userAddressModel.updateOne(
+    return this.shopBookModel.updateOne(
       { _id: id },
       {
         deletedBy: user._id,

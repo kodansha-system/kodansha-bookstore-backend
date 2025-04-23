@@ -47,6 +47,9 @@ importers:
       '@nestjs/throttler':
         specifier: 4.1.0
         version: 4.1.0(@nestjs/common@9.4.0(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.13)(rxjs@7.2.0))(@nestjs/core@9.4.0(@nestjs/common@9.4.0(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.13)(rxjs@7.2.0))(@nestjs/platform-express@9.4.0)(reflect-metadata@0.1.13)(rxjs@7.2.0))(reflect-metadata@0.1.13)
+      '@payos/node':
+        specifier: ^1.0.10
+        version: 1.0.10
       '@types/bcryptjs':
         specifier: ^2.4.6
         version: 2.4.6
@@ -143,7 +146,7 @@ importers:
         version: 9.4.2
       '@nestjs/schematics':
         specifier: 9.1.0
-        version: 9.1.0(chokidar@4.0.3)(typescript@4.9.5)
+        version: 9.1.0(chokidar@3.5.3)(typescript@4.9.5)
       '@nestjs/testing':
         specifier: 9.0.0
         version: 9.0.0(@nestjs/common@9.4.0(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.13)(rxjs@7.2.0))(@nestjs/core@9.4.0(@nestjs/common@9.4.0(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.13)(rxjs@7.2.0))(@nestjs/platform-express@9.4.0)(reflect-metadata@0.1.13)(rxjs@7.2.0))(@nestjs/platform-express@9.4.0(@nestjs/common@9.4.0(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.13)(rxjs@7.2.0))(@nestjs/core@9.4.0))
@@ -1517,6 +1520,9 @@ packages:
   '@opentelemetry/api@1.9.0':
     resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
     engines: {node: '>=8.0.0'}
+
+  '@payos/node@1.0.10':
+    resolution: {integrity: sha512-dY+WHd6pLa558a1G8yv6oKfVe5QLTNyYnQBaSQtwvMAm/p0faKAnfXt04LNIwO9/4buas4ES+sDxc1bfX/mVbQ==}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -5454,16 +5460,6 @@ snapshots:
     optionalDependencies:
       chokidar: 3.5.3
 
-  '@angular-devkit/core@15.2.4(chokidar@4.0.3)':
-    dependencies:
-      ajv: 8.12.0
-      ajv-formats: 2.1.1(ajv@8.12.0)
-      jsonc-parser: 3.2.0
-      rxjs: 6.6.7
-      source-map: 0.7.4
-    optionalDependencies:
-      chokidar: 4.0.3
-
   '@angular-devkit/core@15.2.6(chokidar@3.5.3)':
     dependencies:
       ajv: 8.12.0
@@ -5499,16 +5495,6 @@ snapshots:
   '@angular-devkit/schematics@15.2.4(chokidar@3.5.3)':
     dependencies:
       '@angular-devkit/core': 15.2.4(chokidar@3.5.3)
-      jsonc-parser: 3.2.0
-      magic-string: 0.29.0
-      ora: 5.4.1
-      rxjs: 6.6.7
-    transitivePeerDependencies:
-      - chokidar
-
-  '@angular-devkit/schematics@15.2.4(chokidar@4.0.3)':
-    dependencies:
-      '@angular-devkit/core': 15.2.4(chokidar@4.0.3)
       jsonc-parser: 3.2.0
       magic-string: 0.29.0
       ora: 5.4.1
@@ -7177,16 +7163,6 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@nestjs/schematics@9.1.0(chokidar@4.0.3)(typescript@4.9.5)':
-    dependencies:
-      '@angular-devkit/core': 15.2.4(chokidar@4.0.3)
-      '@angular-devkit/schematics': 15.2.4(chokidar@4.0.3)
-      jsonc-parser: 3.2.0
-      pluralize: 8.0.0
-      typescript: 4.9.5
-    transitivePeerDependencies:
-      - chokidar
-
   '@nestjs/swagger@7.0.4(@nestjs/common@9.4.0(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.13)(rxjs@7.2.0))(@nestjs/core@9.4.0(@nestjs/common@9.4.0(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.13)(rxjs@7.2.0))(@nestjs/platform-express@9.4.0)(reflect-metadata@0.1.13)(rxjs@7.2.0))(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.13)':
     dependencies:
       '@nestjs/common': 9.4.0(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.1.13)(rxjs@7.2.0)
@@ -7255,6 +7231,13 @@ snapshots:
 
   '@opentelemetry/api@1.9.0':
     optional: true
+
+  '@payos/node@1.0.10':
+    dependencies:
+      axios: 1.8.4
+      crypto: 1.0.1
+    transitivePeerDependencies:
+      - debug
 
   '@pkgjs/parseargs@0.11.0':
     optional: true

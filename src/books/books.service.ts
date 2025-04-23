@@ -60,6 +60,10 @@ export class BooksService {
     const totalItems = (await this.bookModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
+    if (filter.get_all === true) {
+      return { books: await this.bookModel.find({}).exec() };
+    }
+
     const result = await this.bookModel
       .find(filter)
       .skip(offset)

@@ -49,11 +49,7 @@ export class OrdersController {
     @Body() updateOrderDto: { status: number },
     @User() user: IUserBody,
   ) {
-    return this.ordersService.updateOrderStatus(
-      id,
-      updateOrderDto.status,
-      user,
-    );
+    return this.ordersService.updateOrderStatus(id, updateOrderDto.status);
   }
 
   @Patch(':id')

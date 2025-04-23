@@ -2,12 +2,18 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Order, OrderDocument } from './schemas/order.schema';
+import {
+  DeliveryMethod,
+  Order,
+  OrderDocument,
+  PaymentStatus,
+} from './schemas/order.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import { OrderStatus } from 'src/utils/enums';
 import { ConfigService } from '@nestjs/config';
+import { PayosService } from 'src/payos/payos.service';
 @Injectable()
 export class OrdersService {
   constructor(
@@ -15,25 +21,68 @@ export class OrdersService {
     private orderModel: SoftDeleteModel<OrderDocument>,
 
     private configService: ConfigService,
+
+    private readonly payosService: PayosService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, user: IUserBody) {
-    const order = await this.orderModel.create({
-      ...createOrderDto,
-      user_id: user?._id,
-      order_status: OrderStatus.New,
-      tracking_order: [
-        {
-          status: OrderStatus.New,
-          time: new Date(),
-        },
-      ],
-      created_by: user,
-    });
+    const delivery_method = createOrderDto.delivery_method;
+    const payment_expire_at = new Date(Date.now() + 5 * 60 * 1000);
 
-    return {
-      order,
-    };
+    if (delivery_method === DeliveryMethod.STORE_PICKUP) {
+      const shop_pickup_expire_at = new Date(
+        Date.now() + 7 * 24 * 60 * 60 * 1000,
+      );
+
+      const order = await this.orderModel.create({
+        ...createOrderDto,
+        user_id: user?._id,
+        order_status: OrderStatus.New,
+        payment_status: PaymentStatus.PENDING,
+        tracking_order: [
+          {
+            status: OrderStatus.New,
+            time: new Date(),
+          },
+        ],
+        shop_pickup_expire_at,
+        ...(createOrderDto.payment_method === 'online' && {
+          payment_expire_at,
+        }),
+      });
+
+      return { order };
+    }
+
+    if (delivery_method === DeliveryMethod.HOME_DELIVERY) {
+      const order = await this.orderModel.create({
+        ...createOrderDto,
+        user_id: user?._id,
+        order_status: OrderStatus.New,
+        payment_status: PaymentStatus.PENDING,
+        tracking_order: [
+          {
+            status: OrderStatus.New,
+            time: new Date(),
+          },
+        ],
+        ...(createOrderDto.payment_method === 'online' && {
+          payment_expire_at,
+        }),
+      });
+
+      return { order };
+    }
+    // const paymentLink = await this.payosService.createPaymentLink({
+    //   orderCode: Number(`${Date.now()}`.slice(-10)),
+    //   amount: 2000,
+    //   description: 'kodansha1',
+    //   returnUrl: 'http://localhost:3000/payment-result?status=success',
+    //   cancelUrl: 'http://localhost:3000/cart',
+    //   expiredAt: expirationTime,
+    // });
+
+    return 'ok';
   }
 
   async findAll(query) {
@@ -73,6 +122,10 @@ export class OrdersService {
       {
         path: 'books.book_id',
         select: { name: 1, images: 1, price: 1, rating_average: 1 },
+      },
+      {
+        path: 'shop_id',
+        select: { address: 1 },
       },
       {
         path: 'user_id',
@@ -116,10 +169,9 @@ export class OrdersService {
     }
   }
 
-  async updateOrderStatus(id: string, status: number, user: IUserBody) {
+  async updateOrderStatus(id: string, status: number) {
     try {
       const order = await this.orderModel.findById(id);
-
       if (!order) {
         return new BadRequestException('Không tìm thấy đơn hàng');
       }

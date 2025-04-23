@@ -3,6 +3,23 @@ import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { OrderStatus } from 'src/utils/enums';
 
 export type OrderDocument = HydratedDocument<Order>;
+
+export enum DeliveryMethod {
+  STORE_PICKUP = 'store_pickup',
+  HOME_DELIVERY = 'home_delivery',
+}
+
+export enum PaymentMethod {
+  ONLINE = 'online',
+  OFFLINE = 'offline',
+}
+
+export enum PaymentStatus {
+  PENDING = 'pending',
+  PAID = 'paid',
+  FAILED = 'failed',
+}
+
 @Schema({ _id: false })
 export class Carrier {
   @Prop({ required: true })
@@ -17,7 +34,6 @@ export class Carrier {
   @Prop({ required: true })
   order_code: string;
 }
-export const CarrierSchema = SchemaFactory.createForClass(Carrier);
 
 @Schema({ timestamps: true })
 export class Order {
@@ -25,7 +41,7 @@ export class Order {
   user_id: Types.ObjectId;
 
   @Prop({ type: Object })
-  address: {
+  delivery_address: {
     street: string;
     ward_id: string;
     ward_name: string;
@@ -37,6 +53,16 @@ export class Order {
     customer_name: string;
   };
 
+  @Prop({
+    type: String,
+    enum: DeliveryMethod,
+    required: true,
+  })
+  delivery_method: DeliveryMethod;
+
+  @Prop({ type: Types.ObjectId, ref: 'Shop' })
+  shop_id: Types.ObjectId;
+
   @Prop({ type: Number, required: true })
   total_price: number;
 
@@ -46,7 +72,7 @@ export class Order {
   @Prop({ type: Number, required: true })
   total_to_pay: number;
 
-  @Prop({ type: Object, required: true })
+  @Prop({ type: Object })
   carrier: {
     id: string;
     name: string;
@@ -74,11 +100,24 @@ export class Order {
   @Prop([{ type: mongoose.Schema.Types.ObjectId, ref: 'Vouchers' }])
   vouchers: mongoose.Schema.Types.ObjectId[];
 
-  @Prop({ type: String })
-  paymethod: string;
+  @Prop({ type: String, enum: PaymentMethod, required: true })
+  payment_method: PaymentMethod;
+
+  @Prop({
+    type: String,
+    enum: PaymentStatus,
+    default: PaymentStatus.PENDING,
+  })
+  payment_status: PaymentStatus;
 
   @Prop({ type: String })
   note: string;
+
+  @Prop()
+  shop_pickup_expire_at: Date;
+
+  @Prop()
+  payment_expire_at: Date;
 
   @Prop({ type: Object })
   created_by: {

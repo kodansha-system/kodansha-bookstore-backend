@@ -8,13 +8,13 @@ export class CreateShopDto {
   address: string;
 
   @IsNotEmpty()
-  ward: string;
+  ward_id: string;
 
   @IsNotEmpty()
-  district: string;
+  district_id: string;
 
   @IsNotEmpty()
-  province: string;
+  province_id: string;
 
   @IsString()
   name: string;
@@ -24,4 +24,10 @@ export class CreateShopDto {
 
   @IsString()
   latitude: string;
+
+  @IsString()
+  working_time: string;
+
+  @IsString()
+  description: string;
 }

@@ -1,18 +1,25 @@
-import { Prop } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsDate,
   IsEnum,
   IsMongoId,
   IsNotEmpty,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import { ObjectId, Types } from 'mongoose';
 import { OrderStatus } from 'src/utils/enums';
+import {
+  DeliveryMethod,
+  PaymentMethod,
+  PaymentStatus,
+} from '../schemas/order.schema';
 
 export class BookItemDto {
   @IsNotEmpty()
@@ -36,9 +43,6 @@ class CarrierDto {
 
   @IsNumber()
   fee: number;
-
-  @IsString()
-  order_code: string;
 }
 
 class TrackingDto {
@@ -51,17 +55,27 @@ class TrackingDto {
 export class CreateOrderDto {
   user_id: Types.ObjectId;
 
+  @IsOptional()
+  shop_id: Types.ObjectId;
+
+  @ValidateIf((o) => o.delivery_method === DeliveryMethod.HOME_DELIVERY)
   @IsNotEmpty()
-  address: {
-    name: string;
+  @IsObject()
+  delivery_address: {
+    street: string;
+    ward_id: string;
+    ward_name: string;
+    district_id: string;
+    district_name: string;
+    province_id: string;
+    province_name: string;
     phone: string;
-    description: string;
+    customer_name: string;
   };
 
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => BookItemDto)
-  books: BookItemDto[];
+  @IsEnum(DeliveryMethod)
+  @IsNotEmpty()
+  delivery_method: DeliveryMethod;
 
   @IsNotEmpty()
   total_price: number;
@@ -72,6 +86,18 @@ export class CreateOrderDto {
   @IsNotEmpty()
   total_to_pay: number;
 
+  @ValidateIf((o) => o.delivery_method === DeliveryMethod.HOME_DELIVERY)
+  @ValidateNested()
+  @Type(() => CarrierDto)
+  carrier: CarrierDto;
+
+  tracking_order: TrackingDto[];
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BookItemDto)
+  books: BookItemDto[];
+
   @IsOptional()
   @IsEnum(OrderStatus)
   order_status: OrderStatus;
@@ -79,15 +105,14 @@ export class CreateOrderDto {
   @IsOptional()
   vouchers: ObjectId[];
 
-  @ValidateNested()
-  @Type(() => CarrierDto)
-  carrier: CarrierDto;
+  @IsEnum(PaymentMethod)
+  @IsNotEmpty()
+  payment_method: PaymentMethod;
+
+  @IsOptional()
+  @IsEnum(PaymentStatus)
+  payment_status: PaymentStatus;
 
   @IsOptional()
   note: string;
-
-  @IsString()
-  paymethod: string;
-
-  tracking_order: TrackingDto[];
 }

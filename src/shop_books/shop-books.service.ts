@@ -6,7 +6,8 @@ import { ShopBook, ShopBookDocument } from './schemas/shop-book.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
-import { FilesService } from 'src/files/files.service';
+import { Shop, ShopDocument } from 'src/shops/schemas/shop.schema';
+import mongoose from 'mongoose';
 @Injectable()
 export class ShopBooksService {
   constructor(
@@ -15,14 +16,25 @@ export class ShopBooksService {
   ) {}
 
   async create(createShopBookDto: CreateShopBookDto, user: IUserBody) {
-    const shopBook = await this.shopBookModel.create({
-      ...createShopBookDto,
-      created_by: user._id,
+    const isExistShopBook = await this.shopBookModel.find({
+      book_id: createShopBookDto?.book_id,
+      shop_id: createShopBookDto?.shop_id,
     });
 
-    return {
-      shopBook,
-    };
+    if (!isExistShopBook) {
+      const shopBook = await this.shopBookModel.create({
+        ...createShopBookDto,
+        created_by: user._id,
+      });
+
+      return {
+        shopBook,
+      };
+    }
+
+    return new BadRequestException(
+      'Sách đã tồn tại trong cửa hàng này rồi vui lòng cập nhật',
+    );
   }
 
   async findAll(query) {
@@ -88,6 +100,67 @@ export class ShopBooksService {
         select: 'name',
       },
     ]);
+  }
+
+  async findShopsHaveBook(query) {
+    const bookIds = (query.book_ids || []).map(
+      (id) => new mongoose.Types.ObjectId(id),
+    );
+
+    const results = await this.shopBookModel.aggregate([
+      {
+        $match: {
+          book_id: { $in: bookIds },
+          quantity: { $gt: 0 },
+        },
+      },
+      {
+        $group: {
+          _id: '$shop_id',
+          bookIdsInShop: { $addToSet: '$book_id' },
+          totalBooks: { $sum: 1 },
+        },
+      },
+      {
+        $match: {
+          $expr: {
+            $eq: [{ $size: '$bookIdsInShop' }, bookIds.length],
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: 'shops',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'shop',
+        },
+      },
+      {
+        $unwind: '$shop',
+      },
+      {
+        $match: {
+          ...(query?.province_id && {
+            'shop.province_id': query.province_id,
+          }),
+          ...(query?.district_id && {
+            'shop.district_id': query.district_id,
+          }),
+        },
+      },
+      {
+        $project: {
+          shop_id: '$_id',
+          'shop.name': 1,
+          'shop.working_time': 1,
+          'shop.address': 1,
+          'shop.phone': 1,
+        },
+      },
+    ]);
+
+    return results;
   }
 
   async update(

@@ -88,18 +88,6 @@ export class ShopsService {
           select: 'name',
         },
       },
-      {
-        path: 'province',
-        select: 'name',
-      },
-      {
-        path: 'district',
-        select: 'name',
-      },
-      {
-        path: 'ward',
-        select: 'name',
-      },
     ]);
   }
 

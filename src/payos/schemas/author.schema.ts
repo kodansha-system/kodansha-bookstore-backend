@@ -1,39 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
-export type ShopDocument = HydratedDocument<Shop>;
+export type AuthorDocument = HydratedDocument<Author>;
 
 @Schema({ timestamps: true })
-export class Shop {
+export class Author {
+  @Prop()
+  name: string;
+
   @Prop()
   image: string;
-
-  @Prop()
-  phone: string;
-
-  @Prop()
-  address: string;
-
-  @Prop()
-  ward_id: string;
-
-  @Prop()
-  district_id: string;
-
-  @Prop()
-  province_id: string;
-
-  @Prop()
-  longitude: string;
-
-  @Prop()
-  latitude: string;
-
-  @Prop()
-  working_time: string;
-
-  @Prop()
-  description: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   created_by: mongoose.Schema.Types.ObjectId;
@@ -57,4 +33,4 @@ export class Shop {
   deletedAt: Date;
 }
 
-export const ShopSchema = SchemaFactory.createForClass(Shop);
+export const AuthorSchema = SchemaFactory.createForClass(Author);

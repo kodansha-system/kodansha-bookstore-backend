@@ -39,6 +39,12 @@ export class ShopBooksController {
   }
 
   @Public()
+  @Get('/book')
+  findShopsHaveBook(@Query() query) {
+    return this.shopBooksService.findShopsHaveBook(query);
+  }
+
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.shopBooksService.findOne(id);

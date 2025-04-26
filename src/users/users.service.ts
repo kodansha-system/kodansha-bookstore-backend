@@ -113,6 +113,11 @@ export class UsersService {
     });
   }
 
+  async getUserInfor(id: string) {
+    const infor = await this.userModel.findById(id).select('-password');
+    return infor;
+  }
+
   async findOneByUsername(username: string) {
     return await this.userModel
       .findOne({
@@ -133,51 +138,32 @@ export class UsersService {
     file?: Express.Multer.File,
   ) {
     const user: any = await this.userModel.findById(id);
+
+    const updateData: any = { ...updateUserDto, updated_by };
+
     if (updateUserDto?.password) {
       const { password } = updateUserDto;
       const hashPassword = this.getHashPassword(password);
-
-      if (file) {
-        this.fileService.validateFile(file);
-
-        const image = await this.fileService.uploadImage(file).catch(() => {
-          throw new BadRequestException('Invalid file type.');
-        });
-
-        const updatedUser = await this.userModel.updateOne(
-          { _id: user?._doc?._id },
-          {
-            ...updateUserDto,
-            password: hashPassword,
-            image: image.url,
-            updated_by,
-          },
-        );
-
-        return updatedUser;
-      }
-
-      const updatedUser = await this.userModel.updateOne(
-        { _id: user?._doc?._id },
-        {
-          ...updateUserDto,
-          password: hashPassword,
-          updated_by,
-        },
-      );
-
-      return updatedUser;
-    } else {
-      const updatedUser = await this.userModel.updateOne(
-        { _id: user?._doc?._id },
-        {
-          ...updateUserDto,
-          updated_by,
-        },
-      );
-
-      return updatedUser;
+      updateData.password = hashPassword;
     }
+
+    if (file) {
+      this.fileService.validateFile(file);
+
+      const image = await this.fileService.uploadImage(file).catch((e) => {
+        console.log(e);
+        throw new BadRequestException('Invalid file type.');
+      });
+
+      updateData.image = image.url;
+    }
+
+    const updatedUser = await this.userModel.updateOne(
+      { _id: user?._doc?._id },
+      updateData,
+    );
+
+    return updatedUser;
   }
 
   async remove(id: string, deletedBy: IUser) {

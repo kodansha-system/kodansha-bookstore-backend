@@ -3,6 +3,7 @@ import {
   IsEmail,
   IsMongoId,
   IsNotEmpty,
+  IsOptional,
   IsString,
 } from 'class-validator';
 import mongoose from 'mongoose';
@@ -11,6 +12,9 @@ import { AccType } from '../users.interface';
 export class CreateUserDto {
   @IsString()
   name: string;
+
+  @IsOptional()
+  phone_number: string;
 
   @IsEmail()
   @IsNotEmpty({ message: 'Email không dc để trống' })

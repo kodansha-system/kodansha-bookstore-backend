@@ -44,8 +44,8 @@ export class AuthController {
 
   @Get('/profile')
   async getProfile(@Request() req) {
-    const temp = await this.roleService.findOne(req?.user?.role?._id);
-    return { ...req.user, permissions: temp?.permissions };
+    const infor = await this.usersService.getUserInfor(req?.user?._id);
+    return { ...req.user, ...infor };
   }
 
   @ResponseMessage('Register a user')

@@ -24,8 +24,17 @@ export class User {
   @Prop()
   gender: string;
 
-  @Prop()
-  address: string;
+  @Prop({ type: Object })
+  addresses: {
+    _id: { type: mongoose.Schema.Types.ObjectId; auto: true };
+    customer_name: string;
+    phone_number;
+    street: string;
+    ward: string;
+    district: string;
+    province: string;
+    is_default: boolean;
+  }[];
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Shop.name })
   shop_id: mongoose.Schema.Types.ObjectId;

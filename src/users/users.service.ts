@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
@@ -8,6 +12,7 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from './users.interface';
 import aqp from 'api-query-params';
 import { FilesService } from 'src/files/files.service';
+import { Types } from 'mongoose';
 @Injectable()
 export class UsersService {
   constructor(
@@ -201,4 +206,76 @@ export class UsersService {
   updatePassword = async (email: string, password: string) => {
     return this.userModel.updateOne({ email }, { password });
   };
+
+  async addAddress(userId: string, addressDto: any) {
+    if (addressDto.is_default) {
+      await this.userModel.updateOne(
+        { _id: userId },
+        { $set: { 'addresses.$[].is_default': false } },
+      );
+    }
+
+    return this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          $push: {
+            addresses: {
+              ...addressDto,
+              id: new Types.ObjectId(),
+            },
+          },
+        },
+        { new: true },
+      )
+      .select('-password');
+  }
+
+  async updateAddress(userId: string, addressId: string, addressDto: any) {
+    const updateObj = {};
+    for (const key in addressDto) {
+      updateObj[`addresses.$.${key}`] = addressDto[key];
+    }
+
+    if (addressDto.is_default) {
+      await this.userModel.updateOne(
+        { _id: userId },
+        { $set: { 'addresses.$[].is_default': false } },
+      );
+    }
+
+    console.log(addressId, updateObj);
+
+    return this.userModel
+      .findOneAndUpdate(
+        { _id: userId, 'addresses.id': new Types.ObjectId(addressId) },
+        { $set: updateObj },
+        { new: true },
+      )
+      .select('-password');
+  }
+
+  async getAddresses(userId: string) {
+    return this.userModel.findById({ _id: userId }).select('addresses');
+  }
+
+  async deleteAddress(userId: string, addressId: string) {
+    if (!Types.ObjectId.isValid(userId) || !Types.ObjectId.isValid(addressId)) {
+      throw new BadRequestException('Invalid ID format');
+    }
+
+    const updatedUser = await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { $pull: { addresses: { id: new Types.ObjectId(addressId) } } },
+        { new: true },
+      )
+      .select('-password');
+
+    if (!updatedUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    return updatedUser;
+  }
 }

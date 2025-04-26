@@ -32,7 +32,16 @@ export class CreateUserDto {
   gender: string;
 
   @IsArray()
-  address: string[];
+  @IsOptional()
+  addresses: {
+    customer_name: string;
+    phone_number: string;
+    street: string;
+    ward: string;
+    district: string;
+    province: string;
+    is_default?: boolean;
+  }[];
 
   @IsNotEmpty({ message: 'Role không dc để trống' })
   @IsMongoId()

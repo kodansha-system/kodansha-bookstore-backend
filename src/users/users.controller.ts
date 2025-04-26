@@ -9,6 +9,7 @@ import {
   Query,
   UploadedFile,
   UseInterceptors,
+  Put,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -38,13 +39,31 @@ export class UsersController {
     return this.usersService.findAll(query);
   }
 
-  @Get(':id/products/:prod')
-  findOneProduct(@Param('id') id: string, @Param('prod') idProd: string) {
-    // return this.usersService.findOne(+id);
-    return {
-      id,
-      idProd,
-    };
+  @Post(':id/addresses')
+  async addAddress(@Param('id') userId: string, @Body() addressDto: any) {
+    return this.usersService.addAddress(userId, addressDto);
+  }
+
+  @Put(':id/addresses/:addressId')
+  async updateAddress(
+    @Param('id') userId: string,
+    @Param('addressId') addressId: string,
+    @Body() addressDto: any,
+  ) {
+    return this.usersService.updateAddress(userId, addressId, addressDto);
+  }
+
+  @Get(':id/addresses')
+  async getAddresses(@Param('id') userId: string) {
+    return this.usersService.getAddresses(userId);
+  }
+
+  @Delete(':userId/addresses/:addressId')
+  async deleteAddress(
+    @Param('userId') userId: string,
+    @Param('addressId') addressId: string,
+  ) {
+    return this.usersService.deleteAddress(userId, addressId);
   }
 
   @Public()

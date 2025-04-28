@@ -42,6 +42,11 @@ export class BooksController {
     return this.booksService.findAll(query);
   }
 
+  @Get('search')
+  async searchBooks(@Query('keyword') keyword: string) {
+    return this.booksService.searchBooks(keyword);
+  }
+
   @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {

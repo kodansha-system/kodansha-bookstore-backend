@@ -160,4 +160,30 @@ export class BooksService {
       },
     );
   }
+
+  async searchBooks(keyword: string) {
+    function removeVietnameseTones(str: string) {
+      str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      str = str.replace(/đ/g, 'd').replace(/Đ/g, 'D');
+      // Thêm các thay thế cụ thể cho nguyên âm ghép
+      str = str.replace(/[àáảãạăằắẳẵặâầấẩẫậ]/g, 'a');
+      str = str.replace(/[èéẻẽẹêềếểễệ]/g, 'e');
+      str = str.replace(/[ìíỉĩị]/g, 'i');
+      str = str.replace(/[òóỏõọôồốổỗộơờớởỡợ]/g, 'o');
+      str = str.replace(/[ùúủũụưừứửữự]/g, 'u');
+      str = str.replace(/[ỳýỷỹỵ]/g, 'y');
+      return str;
+    }
+
+    if (!keyword) return [];
+
+    const allBooks = await this.bookModel.find().exec();
+    const normalizedKeyword = removeVietnameseTones(keyword).toLowerCase();
+
+    return allBooks.filter((book) =>
+      removeVietnameseTones(book.name)
+        .toLowerCase()
+        .includes(normalizedKeyword),
+    );
+  }
 }

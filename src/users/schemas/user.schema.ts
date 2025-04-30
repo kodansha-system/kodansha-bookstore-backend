@@ -26,7 +26,7 @@ export class User {
 
   @Prop({ type: Object })
   addresses: {
-    _id: { type: mongoose.Schema.Types.ObjectId; auto: true };
+    id: { type: mongoose.Schema.Types.ObjectId; auto: true };
     customer_name: string;
     phone_number;
     street: string;

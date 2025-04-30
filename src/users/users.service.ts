@@ -208,11 +208,19 @@ export class UsersService {
   };
 
   async addAddress(userId: string, addressDto: any) {
-    if (addressDto.is_default) {
-      await this.userModel.updateOne(
-        { _id: userId },
-        { $set: { 'addresses.$[].is_default': false } },
-      );
+    const user = await this.userModel.findById(userId).select('addresses');
+
+    const hasAddresses = user && user.addresses && user.addresses.length > 0;
+
+    if (hasAddresses) {
+      if (addressDto.is_default) {
+        await this.userModel.updateOne(
+          { _id: userId },
+          { $set: { 'addresses.$[].is_default': false } },
+        );
+      }
+    } else {
+      addressDto.is_default = true;
     }
 
     return this.userModel
@@ -255,14 +263,41 @@ export class UsersService {
       .select('-password');
   }
 
-  async getAddresses(userId: string) {
-    return this.userModel.findById({ _id: userId }).select('addresses');
+  async getAddresses(userId: string, is_default: boolean) {
+    if (!is_default)
+      return this.userModel.findById({ _id: userId }).select('addresses');
+
+    const user = await this.userModel
+      .findOne({ _id: userId })
+      .select('addresses')
+      .lean();
+
+    const defaultAddress = user?.addresses?.find(
+      (address) => address.is_default,
+    );
+
+    return defaultAddress;
   }
 
   async deleteAddress(userId: string, addressId: string) {
     if (!Types.ObjectId.isValid(userId) || !Types.ObjectId.isValid(addressId)) {
       throw new BadRequestException('Invalid ID format');
     }
+
+    const user = await this.userModel.findById(userId).select('addresses');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const addressToDelete = user.addresses.find(
+      (address: any) => address.id.toString() === addressId,
+    );
+
+    if (!addressToDelete) {
+      throw new NotFoundException('Address not found');
+    }
+
+    const isDefault = addressToDelete.is_default;
 
     const updatedUser = await this.userModel
       .findByIdAndUpdate(
@@ -273,7 +308,16 @@ export class UsersService {
       .select('-password');
 
     if (!updatedUser) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('User not found after deletion');
+    }
+
+    if (isDefault && updatedUser.addresses.length > 0) {
+      const firstAddressId = updatedUser.addresses[0].id;
+
+      await this.userModel.updateOne(
+        { _id: userId, 'addresses.id': firstAddressId },
+        { $set: { 'addresses.$.is_default': true } },
+      );
     }
 
     return updatedUser;

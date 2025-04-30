@@ -54,8 +54,8 @@ export class UsersController {
   }
 
   @Get(':id/addresses')
-  async getAddresses(@Param('id') userId: string) {
-    return this.usersService.getAddresses(userId);
+  async getAddresses(@Param('id') userId: string, @Query() params) {
+    return this.usersService.getAddresses(userId, params?.is_default);
   }
 
   @Delete(':userId/addresses/:addressId')

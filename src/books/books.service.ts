@@ -7,12 +7,15 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import { FilesService } from 'src/files/files.service';
-import mongoose, { mongo } from 'mongoose';
+import mongoose, { Types } from 'mongoose';
 @Injectable()
 export class BooksService {
   constructor(
     @InjectModel(Book.name)
     private bookModel: SoftDeleteModel<BookDocument>,
+
+    @InjectModel('Author')
+    private authorModel: SoftDeleteModel<any>,
 
     private fileService: FilesService,
   ) {}
@@ -161,29 +164,127 @@ export class BooksService {
     );
   }
 
-  async searchBooks(keyword: string) {
-    function removeVietnameseTones(str: string) {
-      str = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-      str = str.replace(/đ/g, 'd').replace(/Đ/g, 'D');
-      // Thêm các thay thế cụ thể cho nguyên âm ghép
-      str = str.replace(/[àáảãạăằắẳẵặâầấẩẫậ]/g, 'a');
-      str = str.replace(/[èéẻẽẹêềếểễệ]/g, 'e');
-      str = str.replace(/[ìíỉĩị]/g, 'i');
-      str = str.replace(/[òóỏõọôồốổỗộơờớởỡợ]/g, 'o');
-      str = str.replace(/[ùúủũụưừứửữự]/g, 'u');
-      str = str.replace(/[ỳýỷỹỵ]/g, 'y');
-      return str;
+  async searchBooks(
+    keyword?: string,
+    categoryId?: string | string[],
+    authorId?: string | string[],
+    sortPrice?: 'asc' | 'desc',
+    ratingGte?: number,
+    page = 1,
+    limit = 10,
+  ) {
+    console.log(keyword);
+    const pipeline: any[] = [];
+    const matchStage: any = {};
+
+    if (categoryId) {
+      let categoryIds: string[];
+      if (typeof categoryId === 'string') {
+        categoryIds = categoryId.split(',').map((id) => id.trim());
+      } else {
+        categoryIds = categoryId;
+      }
+
+      matchStage.category_id = {
+        $in: categoryIds.map((id) => new Types.ObjectId(id)),
+      };
     }
 
-    if (!keyword) return [];
+    if (ratingGte !== undefined) {
+      matchStage.rating_average = { $gte: ratingGte };
+    }
 
-    const allBooks = await this.bookModel.find().exec();
-    const normalizedKeyword = removeVietnameseTones(keyword).toLowerCase();
+    if (authorId) {
+      let authorIds: string[];
+      if (typeof authorId === 'string') {
+        authorIds = authorId.split(',').map((id) => id.trim());
+      } else {
+        authorIds = authorId;
+      }
 
-    return allBooks.filter((book) =>
-      removeVietnameseTones(book.name)
-        .toLowerCase()
-        .includes(normalizedKeyword),
-    );
+      matchStage.authors = {
+        $in: authorIds.map((id) => new Types.ObjectId(id)),
+      };
+    }
+
+    if (Object.keys(matchStage).length > 0) {
+      pipeline.push({ $match: matchStage });
+    }
+
+    pipeline.push({
+      $lookup: {
+        from: 'authors',
+        localField: 'authors',
+        foreignField: '_id',
+        as: 'authorDetails',
+      },
+    });
+
+    if (keyword) {
+      const searchPattern = keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+
+      pipeline.push({
+        $match: {
+          name: {
+            $regex: searchPattern,
+            $options: 'i',
+          },
+        },
+      });
+    }
+
+    const sortStage: any = {};
+    if (sortPrice === 'asc') {
+      sortStage.price = 1;
+    } else if (sortPrice === 'desc') {
+      sortStage.price = -1;
+    }
+
+    if (Object.keys(sortStage).length > 0) {
+      pipeline.push({ $sort: sortStage });
+    }
+
+    const paginatedPipeline = [
+      ...pipeline,
+      {
+        $facet: {
+          metadata: [{ $count: 'total' }],
+          data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+        },
+      },
+      {
+        $project: {
+          books: '$data',
+          total: { $arrayElemAt: ['$metadata.total', 0] },
+          page: { $literal: page },
+          limit: { $literal: limit },
+        },
+      },
+    ];
+
+    const result = await this.bookModel.aggregate(paginatedPipeline).exec();
+
+    if (result.length > 0) {
+      const { books, total, page: currentPage, limit: pageLimit } = result[0];
+      return {
+        books,
+        pagination: {
+          currentPage,
+          pageSize: pageLimit,
+          totalItems: total || 0,
+          totalPages: Math.ceil((total || 0) / pageLimit),
+        },
+      };
+    }
+
+    return {
+      books: [],
+      pagination: {
+        currentPage: page,
+        pageSize: limit,
+        totalItems: 0,
+        totalPages: 0,
+      },
+    };
   }
 }

@@ -35,16 +35,25 @@ export class BooksController {
     return this.booksService.create(createBookDto, user, files);
   }
 
-  @Public()
-  @ResponseMessage('Lấy danh sách sách thành công')
   @Get()
-  findAll(@Query() query) {
-    return this.booksService.findAll(query);
-  }
-
-  @Get('search')
-  async searchBooks(@Query('keyword') keyword: string) {
-    return this.booksService.searchBooks(keyword);
+  async searchBooks(
+    @Query('keyword') keyword: string,
+    @Query('categoryId') categoryId: string,
+    @Query('authorId') authorId: string,
+    @Query('sortPrice') sortPrice: 'asc' | 'desc',
+    @Query('ratingGte') ratingGte: string,
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+  ) {
+    return this.booksService.searchBooks(
+      keyword,
+      categoryId,
+      authorId,
+      sortPrice,
+      ratingGte ? parseFloat(ratingGte) : undefined,
+      +page ? parseInt(page) : 1,
+      +limit ? parseInt(limit) : 10,
+    );
   }
 
   @Public()

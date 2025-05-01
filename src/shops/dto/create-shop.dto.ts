@@ -30,4 +30,7 @@ export class CreateShopDto {
 
   @IsString()
   description: string;
+
+  @IsString()
+  google_map_url: string;
 }

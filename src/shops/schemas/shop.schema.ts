@@ -35,6 +35,9 @@ export class Shop {
   @Prop()
   description: string;
 
+  @Prop()
+  google_map_url: string;
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   created_by: mongoose.Schema.Types.ObjectId;
 

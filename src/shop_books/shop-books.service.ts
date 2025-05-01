@@ -6,7 +6,6 @@ import { ShopBook, ShopBookDocument } from './schemas/shop-book.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
-import { Shop, ShopDocument } from 'src/shops/schemas/shop.schema';
 import mongoose from 'mongoose';
 @Injectable()
 export class ShopBooksService {
@@ -156,6 +155,7 @@ export class ShopBooksService {
           'shop.working_time': 1,
           'shop.address': 1,
           'shop.phone': 1,
+          'shop.google_map_url': 1,
         },
       },
     ]);

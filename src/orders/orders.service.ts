@@ -129,6 +129,11 @@ export class OrdersService {
           },
         );
       }
+
+      await this.bookModel.updateOne(
+        { _id: new Types.ObjectId(item.book_id) },
+        { $inc: { total_sold: item.quantity } },
+      );
     }
   }
 

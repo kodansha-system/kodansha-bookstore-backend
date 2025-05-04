@@ -39,6 +39,7 @@ import { ShopsModule } from './shops/shops.module';
 import { StaffsModule } from './staffs/staffs.module';
 import { FlashSalesModule } from './flashsales/flashsales.module';
 import { ArticlesModule } from './articles/articles.module';
+import { ReviewsModule } from './reviews/reviews.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -114,6 +115,8 @@ import { ArticlesModule } from './articles/articles.module';
     FlashSalesModule,
 
     ArticlesModule,
+
+    ReviewsModule,
 
     ScheduleModule.forRoot(),
 

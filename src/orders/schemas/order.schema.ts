@@ -63,6 +63,9 @@ export class Order {
   @Prop({ type: Types.ObjectId, ref: 'Shop' })
   shop_id: Types.ObjectId;
 
+  @Prop({ type: Types.ObjectId, ref: 'FlashSale' })
+  flash_sale_id: Types.ObjectId;
+
   @Prop({ type: Number, required: true })
   total_price: number;
 
@@ -90,9 +93,15 @@ export class Order {
       book_id: { type: Types.ObjectId, ref: 'Book', required: true },
       quantity: { type: Number, required: true, min: 1 },
       price: { type: Number, required: true },
+      is_flash_sale: { type: Boolean, required: true },
     },
   ])
-  books: { book_id: Types.ObjectId; quantity: number; price: number }[];
+  books: {
+    book_id: Types.ObjectId;
+    quantity: number;
+    price: number;
+    is_flash_sale: boolean;
+  }[];
 
   @Prop({ enum: OrderStatus, default: OrderStatus.New })
   order_status: OrderStatus;

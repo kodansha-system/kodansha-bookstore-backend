@@ -39,30 +39,41 @@ export class AuthorsService {
   }
 
   async findAll(query) {
-    const { filter, sort, population, projection } = aqp(query);
+    const { name, current = 1, pageSize = 10, sort_order, get_all } = query;
 
-    const offset = (+filter?.current - 1) * filter?.pageSize;
-    const defaultLimit = +filter?.pageSize || 10;
+    const filter: any = {};
 
-    delete filter?.current;
-    delete filter?.pageSize;
+    if (name) {
+      filter.name = { $regex: name, $options: 'i' };
+    }
 
-    const totalItems = (await this.authorModel.find(filter)).length;
-    const totalPages = Math.ceil(totalItems / defaultLimit);
+    const sort: any = {};
+    if (sort_order) {
+      sort.name = sort_order === 'desc' ? -1 : 1;
+    }
+
+    let skip = 0;
+    let limit = 10;
+
+    if (get_all !== 'true') {
+      skip = (+current - 1) * +pageSize;
+      limit = +pageSize || 10;
+    }
+
+    const totalItems = await this.authorModel.countDocuments(filter);
+    const totalPages = get_all === 'true' ? 1 : Math.ceil(totalItems / limit);
 
     const result = await this.authorModel
       .find(filter)
-      .skip(offset)
-      .limit(defaultLimit)
-      .sort(sort as any)
-      .populate(population)
-      .select(projection)
+      .sort(sort)
+      .skip(skip)
+      .limit(get_all === 'true' ? 0 : limit)
       .exec();
 
     return {
       meta: {
-        currentPage: filter?.current || 1,
-        pageSize: defaultLimit,
+        currentPage: +current,
+        pageSize: get_all === 'true' ? totalItems : limit,
         totalItems,
         totalPages,
       },

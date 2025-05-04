@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsDate,
   IsEnum,
   IsMongoId,
@@ -32,6 +33,9 @@ export class BookItemDto {
 
   @IsNotEmpty()
   price: number;
+
+  @IsBoolean()
+  is_flash_sale: boolean;
 }
 
 class CarrierDto {
@@ -57,6 +61,9 @@ export class CreateOrderDto {
 
   @IsOptional()
   shop_id: Types.ObjectId;
+
+  @IsOptional()
+  flash_sale_id: Types.ObjectId;
 
   @ValidateIf((o) => o.delivery_method === DeliveryMethod.HOME_DELIVERY)
   @IsNotEmpty()

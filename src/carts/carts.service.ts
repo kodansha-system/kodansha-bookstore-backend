@@ -6,18 +6,64 @@ import { Cart, CartDocument } from './schemas/cart.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
+import { Book, BookDocument } from 'src/books/schemas/book.schema';
+import {
+  FlashSale,
+  FlashSaleDocument,
+} from 'src/flashsales/schemas/flashsale.schema';
+import { Types } from 'mongoose';
+import {
+  ShopBook,
+  ShopBookDocument,
+} from 'src/shop_books/schemas/shop-book.schema';
 @Injectable()
 export class CartsService {
   constructor(
     @InjectModel(Cart.name)
     private cartModel: SoftDeleteModel<CartDocument>,
+
+    @InjectModel(Book.name)
+    private bookModel: SoftDeleteModel<BookDocument>,
+
+    @InjectModel(FlashSale.name)
+    private flashSaleModel: SoftDeleteModel<FlashSaleDocument>,
+
+    @InjectModel(ShopBook.name)
+    private shopBookModel: SoftDeleteModel<ShopBookDocument>,
   ) {}
 
   async create(createCartDto: CreateCartDto, user: IUserBody) {
     const {
       books: [newBook],
-    } = createCartDto; // Lấy phần tử duy nhất trong books
-    // Kiểm tra giỏ hàng của user có tồn tại không
+    } = createCartDto;
+
+    const bookInStock: any = await this.bookModel
+      .findById(newBook.book_id)
+      .lean();
+
+    if (!bookInStock) {
+      throw new Error('Sách không tồn tại.');
+    }
+
+    const bookId = new Types.ObjectId(newBook.book_id);
+
+    const shopStock = await this.shopBookModel.aggregate([
+      { $match: { book_id: bookId } },
+      {
+        $group: {
+          _id: null,
+          totalQuantity: { $sum: '$quantity' },
+        },
+      },
+    ]);
+
+    const totalShopQuantity = shopStock[0]?.totalQuantity || 0;
+    const totalAvailable = (bookInStock.quantity || 0) + totalShopQuantity;
+
+    if (totalAvailable < newBook.quantity) {
+      throw new Error('Số lượng sách không đủ.');
+    }
+
     let cart = await this.cartModel.findOne({ user_id: user._id });
 
     if (cart) {
@@ -90,18 +136,69 @@ export class CartsService {
   }
 
   async findOne(id: string) {
-    return await this.cartModel.findOne({ user_id: id }).populate({
+    const cart = await this.cartModel.findOne({ user_id: id }).populate({
       path: 'books.book_id',
       select: { name: 1, images: 1, price: 1, rating_average: 1, discount: 1 },
     });
   }
 
   async getCartByUserId(user_id: string) {
-    const cart = await this.cartModel.findOne({ user_id }).populate({
-      path: 'books.book_id',
-      select: { name: 1, images: 1, price: 1, rating_average: 1, discount: 1 },
-    });
-    return cart;
+    const cartDoc = await this.cartModel
+      .findOne({ user_id: user_id })
+      .populate({
+        path: 'books.book_id',
+        select: {
+          name: 1,
+          images: 1,
+          price: 1,
+          rating_average: 1,
+          discount: 1,
+        },
+      });
+
+    if (!cartDoc) return null;
+
+    const cart = cartDoc.toObject();
+
+    const now = new Date();
+
+    const flashSale = await this.flashSaleModel
+      .findOne({
+        start_time: { $lte: now },
+        end_time: { $gte: now },
+      })
+      .populate('books.book_id');
+
+    if (flashSale) {
+      const flashSaleMap = new Map(
+        flashSale.books.map((item: any) => [item.book_id._id.toString(), item]), // Map book_id -> flash sale item
+      );
+
+      cart.books = cart.books.map((item: any) => {
+        const bookId = item.book_id._id.toString();
+        const flashSaleItem = flashSaleMap.get(bookId);
+
+        const book = {
+          ...item.book_id,
+          price: flashSaleItem?.price || item.book_id.price,
+          is_flash_sale: !!flashSaleItem,
+        };
+
+        return {
+          ...item,
+          book_id: book,
+        };
+      });
+    }
+
+    if (!flashSale) {
+      return cart;
+    }
+
+    return {
+      ...cart,
+      flash_sale_id: flashSale?._id,
+    };
   }
 
   async update(updateCartDto: UpdateCartDto, user: IUserBody) {

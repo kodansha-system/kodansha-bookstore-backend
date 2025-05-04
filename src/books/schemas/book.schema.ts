@@ -47,6 +47,9 @@ export class Book {
   @Prop()
   description: string;
 
+  @Prop()
+  quantity: number;
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   created_by: mongoose.Schema.Types.ObjectId;
 

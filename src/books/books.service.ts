@@ -8,6 +8,10 @@ import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import { FilesService } from 'src/files/files.service';
 import mongoose, { Types } from 'mongoose';
+import {
+  FlashSale,
+  FlashSaleDocument,
+} from 'src/flashsales/schemas/flashsale.schema';
 @Injectable()
 export class BooksService {
   constructor(
@@ -16,6 +20,9 @@ export class BooksService {
 
     @InjectModel('Author')
     private authorModel: SoftDeleteModel<any>,
+
+    @InjectModel(FlashSale.name)
+    private flashSaleModel: SoftDeleteModel<FlashSaleDocument>,
 
     private fileService: FilesService,
   ) {}
@@ -173,7 +180,6 @@ export class BooksService {
     page = 1,
     limit = 10,
   ) {
-    console.log(keyword);
     const pipeline: any[] = [];
     const matchStage: any = {};
 
@@ -206,6 +212,27 @@ export class BooksService {
         $in: authorIds.map((id) => new Types.ObjectId(id)),
       };
     }
+
+    // Loại bỏ các sách đang flash sale khỏi list sách
+    // const now = new Date();
+
+    // const flashSale = await this.flashSaleModel
+    //   .findOne({
+    //     start_time: { $lte: now },
+    //     end_time: { $gte: now },
+    //   })
+    //   .populate('books.book_id') // Đảm bảo books có thông tin đầy đủ
+    //   .lean();
+
+    // const excludedBookIds =
+    //   flashSale?.books?.map((b) => b.book_id?._id?.toString()) || [];
+
+    // if (excludedBookIds.length > 0) {
+    //   matchStage._id = {
+    //     ...(matchStage._id || {}),
+    //     $nin: excludedBookIds.map((id) => new Types.ObjectId(id)),
+    //   };
+    // }
 
     if (Object.keys(matchStage).length > 0) {
       pipeline.push({ $match: matchStage });
@@ -266,8 +293,50 @@ export class BooksService {
 
     if (result.length > 0) {
       const { books, total, page: currentPage, limit: pageLimit } = result[0];
+
+      // Lấy thời điểm hiện tại
+      const now = new Date();
+
+      // Tìm flash sale đang active
+      const flashSale = await this.flashSaleModel
+        .findOne({
+          start_time: { $lte: now },
+          end_time: { $gte: now },
+        })
+        .populate('books.book_id') // Đảm bảo books có thông tin đầy đủ
+        .lean();
+
+      // Tạo map từ bookId → discount_price
+      const flashSaleMap = new Map<string, number>();
+      if (flashSale?.books?.length) {
+        for (const item of flashSale.books) {
+          flashSaleMap.set(item.book_id._id.toString(), item.price);
+        }
+      }
+
+      // Gắn giá flash sale vào sách nếu có
+      const booksWithFlashSale = books.map((book) => {
+        const bookId = book._id.toString();
+        const discountPrice = flashSaleMap.get(bookId);
+        if (discountPrice !== undefined) {
+          return {
+            id: bookId,
+            ...book,
+            original_price: book.price,
+            price: discountPrice,
+            is_flash_sale: true,
+            flash_sale_ends_at: flashSale.end_time,
+          };
+        }
+        return {
+          id: bookId,
+          ...book,
+          is_flash_sale: false,
+        };
+      });
+
       return {
-        books,
+        books: booksWithFlashSale,
         pagination: {
           currentPage,
           pageSize: pageLimit,
@@ -277,6 +346,7 @@ export class BooksService {
       };
     }
 
+    // Trường hợp không có kết quả
     return {
       books: [],
       pagination: {

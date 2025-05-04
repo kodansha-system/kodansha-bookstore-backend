@@ -1,4 +1,4 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber } from 'class-validator';
 import mongoose from 'mongoose';
 
 export class CreateBookDto {
@@ -39,4 +39,7 @@ export class CreateBookDto {
 
   @IsNotEmpty()
   discount: number;
+
+  @IsNumber()
+  quantity: number;
 }

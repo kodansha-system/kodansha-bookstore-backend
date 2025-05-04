@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateOrderDto } from './dto/create-order.dto';
+import { BookItemDto, CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import {
@@ -14,20 +14,194 @@ import aqp from 'api-query-params';
 import { OrderStatus } from 'src/utils/enums';
 import { ConfigService } from '@nestjs/config';
 import { PayosService } from 'src/payos/payos.service';
+import {
+  FlashSale,
+  FlashSaleDocument,
+} from 'src/flashsales/schemas/flashsale.schema';
+import { Types } from 'mongoose';
+import { Book, BookDocument } from 'src/books/schemas/book.schema';
+import {
+  ShopBook,
+  ShopBookDocument,
+} from 'src/shop_books/schemas/shop-book.schema';
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectModel(Order.name)
     private orderModel: SoftDeleteModel<OrderDocument>,
 
+    @InjectModel(FlashSale.name)
+    private flashSaleModel: SoftDeleteModel<FlashSaleDocument>,
+
+    @InjectModel(Book.name)
+    private bookModel: SoftDeleteModel<BookDocument>,
+
+    @InjectModel(ShopBook.name)
+    private shopBookModel: SoftDeleteModel<ShopBookDocument>,
+
     private configService: ConfigService,
 
     private readonly payosService: PayosService,
   ) {}
 
+  async handleCheckFlashSaleActive(
+    flash_sale_id: any,
+    orderBooks: BookItemDto[],
+  ) {
+    const now = new Date();
+
+    const flashSale = await this.flashSaleModel.findOne({
+      _id: new Types.ObjectId(flash_sale_id),
+      start_time: { $lte: now },
+      end_time: { $gte: now },
+    });
+
+    if (!flashSale) {
+      throw new BadRequestException(
+        'Flash sale không còn hiệu lực hoặc đã hết hạn',
+      );
+    }
+
+    const flashSaleMap = new Map(
+      flashSale.books.map((item: any) => [
+        item.book_id.toString(),
+        item.quantity,
+      ]),
+    );
+
+    for (const item of orderBooks) {
+      const flashQuantity = flashSaleMap.get(item.book_id);
+      if (item.quantity > flashQuantity) {
+        throw new BadRequestException(
+          `Số lượng đặt mua vượt quá tồn kho flash sale`,
+        );
+      }
+    }
+  }
+
+  async updateQuantitiesAfterOrder(
+    orderBooks: any[],
+    delivery_method: string,
+    shop_id?: any,
+    flash_sale_id?: any,
+  ) {
+    for (const item of orderBooks) {
+      const isFlashSaleItem = !!flash_sale_id && item.is_flash_sale;
+      // Nếu là flash sale → trừ cả trong bảng flashSale
+      if (isFlashSaleItem) {
+        await this.flashSaleModel.updateOne(
+          {
+            _id: new Types.ObjectId(flash_sale_id),
+            'books.book_id': item.book_id,
+          },
+          {
+            $inc: {
+              'books.$.quantity': -item.quantity,
+              'books.$.sold': item.quantity,
+            },
+          },
+        );
+      }
+
+      // Luôn trừ trong kho thật
+      if (delivery_method === DeliveryMethod.HOME_DELIVERY) {
+        console.log(item.quantity);
+        const modifiedItem = await this.bookModel.updateOne(
+          { _id: new Types.ObjectId(item.book_id) },
+          { $inc: { quantity: -item.quantity } },
+        );
+
+        console.log(modifiedItem, 'modified item');
+      }
+
+      if (delivery_method === DeliveryMethod.STORE_PICKUP) {
+        if (!shop_id) {
+          throw new BadRequestException('Thiếu shop_id khi nhận tại cửa hàng');
+        }
+
+        await this.shopBookModel.updateOne(
+          {
+            book_id: new Types.ObjectId(item.book_id),
+            shop_id,
+          },
+          {
+            $inc: { quantity: -item.quantity },
+          },
+        );
+      }
+    }
+  }
+
+  async checkStockBeforeCreateOrder(
+    orderBooks: any[],
+    delivery_method: string,
+    shop_id?: any,
+    flash_sale_id?: any,
+  ) {
+    for (const item of orderBooks) {
+      const { book_id, quantity, is_flash_sale } = item;
+
+      // 1. Nếu là flash sale → check số lượng trong flashSale.books
+      if (flash_sale_id && is_flash_sale) {
+        const flashSale = await this.flashSaleModel.findOne({
+          _id: flash_sale_id,
+          'books.book_id': book_id,
+        });
+
+        const bookInFlash = flashSale?.books?.find(
+          (b) => b.book_id.toString() === book_id.toString(),
+        );
+
+        if (!bookInFlash || bookInFlash.quantity < quantity) {
+          throw new BadRequestException(
+            `Sách trong flash sale đã hết hoặc không đủ số lượng`,
+          );
+        }
+      }
+
+      // 2. Check tồn kho sách chính (nếu nhận tại nhà)
+      if (delivery_method === DeliveryMethod.HOME_DELIVERY) {
+        const book = await this.bookModel.findById(book_id);
+        if (!book || book.get('quantity') < quantity) {
+          throw new BadRequestException(
+            `Sách ${book?.name || ''} không đủ số lượng trong kho`,
+          );
+        }
+      }
+
+      // 3. Check tồn kho cửa hàng (nếu nhận tại cửa hàng)
+      if (delivery_method === DeliveryMethod.STORE_PICKUP) {
+        const shopBook = await this.shopBookModel.findOne({
+          book_id,
+          shop_id,
+        });
+
+        if (!shopBook || shopBook.quantity < quantity) {
+          throw new BadRequestException(
+            `Cửa hàng tạm hết một số sách trong đơn hàng. Vui lòng chọn cửa hàng khác hoặc chọn phương thức giao tại nhà!`,
+          );
+        }
+      }
+    }
+  }
+
   async create(createOrderDto: CreateOrderDto, user: IUserBody) {
     const delivery_method = createOrderDto.delivery_method;
     const payment_expire_at = new Date(Date.now() + 5 * 60 * 1000);
+
+    if (createOrderDto?.flash_sale_id) {
+      await this.handleCheckFlashSaleActive(
+        createOrderDto.flash_sale_id,
+        createOrderDto.books,
+      );
+    }
+
+    await this.checkStockBeforeCreateOrder(
+      createOrderDto.books,
+      createOrderDto.delivery_method,
+      createOrderDto.shop_id,
+      createOrderDto.flash_sale_id,
+    );
 
     if (delivery_method === DeliveryMethod.STORE_PICKUP) {
       const shop_pickup_expire_at = new Date(
@@ -51,6 +225,13 @@ export class OrdersService {
         }),
       });
 
+      await this.updateQuantitiesAfterOrder(
+        createOrderDto.books,
+        createOrderDto.delivery_method,
+        createOrderDto.shop_id,
+        createOrderDto.flash_sale_id,
+      );
+
       return { order };
     }
 
@@ -70,6 +251,13 @@ export class OrdersService {
           payment_expire_at,
         }),
       });
+
+      await this.updateQuantitiesAfterOrder(
+        createOrderDto.books,
+        createOrderDto.delivery_method,
+        createOrderDto.shop_id,
+        createOrderDto.flash_sale_id,
+      );
 
       return { order };
     }

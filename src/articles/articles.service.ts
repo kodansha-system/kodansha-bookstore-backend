@@ -41,15 +41,22 @@ export class ArticlesService {
   }
 
   async findAll(query) {
-    const { filter, sort, population, projection } = aqp(query);
+    const { current = 1, pageSize = 10, keyword, ...restQuery } = query;
 
-    const offset = (+filter?.current - 1) * filter?.pageSize;
-    const defaultLimit = +filter?.pageSize || 10;
+    const offset = (+current - 1) * +pageSize;
+    const defaultLimit = +pageSize || 10;
 
-    delete filter?.current;
-    delete filter?.pageSize;
+    const { filter, sort, population, projection } = aqp(restQuery);
 
-    const totalItems = (await this.articleModel.find(filter)).length;
+    // Nếu có keyword thì tìm theo title hoặc content
+    if (keyword) {
+      filter.$or = [
+        { title: { $regex: keyword, $options: 'i' } },
+        { content: { $regex: keyword, $options: 'i' } },
+      ];
+    }
+
+    const totalItems = await this.articleModel.countDocuments(filter);
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
     const result = await this.articleModel
@@ -57,16 +64,13 @@ export class ArticlesService {
       .skip(offset)
       .limit(defaultLimit)
       .sort(sort as any)
-      .populate({
-        path: 'created_by',
-        select: 'name',
-      })
+      .populate({ path: 'created_by', select: 'name' })
       .select(projection)
       .exec();
 
     return {
       meta: {
-        currentPage: filter?.current || 1,
+        currentPage: +current,
         pageSize: defaultLimit,
         totalItems,
         totalPages,

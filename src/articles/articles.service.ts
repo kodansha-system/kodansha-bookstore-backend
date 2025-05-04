@@ -57,7 +57,10 @@ export class ArticlesService {
       .skip(offset)
       .limit(defaultLimit)
       .sort(sort as any)
-      .populate(population)
+      .populate({
+        path: 'created_by',
+        select: 'name',
+      })
       .select(projection)
       .exec();
 

@@ -1,7 +1,8 @@
 // trường hợp khách đến lấy tại cửa hàng thì chỉ có 3 trạng thái new, completed, canceled
 
 export enum OrderStatus {
-  New = 900,
+  New = 1,
+  Verified = 900,
   WaitingPickup = 901,
   PickingUp = 902,
   PickedUp = 903,

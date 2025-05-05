@@ -25,6 +25,11 @@ export class OrdersController {
     return this.ordersService.create(createOrderDto, user);
   }
 
+  @Post('/cancel-order')
+  cancelOrder(@Body() cancelOrderDto: any, @User() user: IUserBody) {
+    return this.ordersService.cancelOrder(cancelOrderDto, user);
+  }
+
   @Public()
   @ResponseMessage('Lấy danh sách đơn hàng thành công')
   @Get()

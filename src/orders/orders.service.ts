@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { BookItemDto, CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { InjectModel } from '@nestjs/mongoose';
@@ -294,8 +299,11 @@ export class OrdersService {
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
-      .sort(sort as any)
-      .populate(population)
+      .sort('-createdAt')
+      .populate({
+        path: 'user_id',
+        select: 'name phone_number email',
+      })
       .select(projection)
       .exec();
 
@@ -399,5 +407,31 @@ export class OrdersService {
         isDeleted: true,
       },
     );
+  }
+
+  async cancelOrder(cancelOrderDto, user) {
+    const order = await this.orderModel.findById(cancelOrderDto.orderId);
+
+    if (!order) {
+      throw new NotFoundException('Không tìm thấy đơn hàng');
+    }
+
+    if (order.user_id.toString() !== user._id) {
+      throw new ForbiddenException('Bạn không có quyền hủy đơn hàng này');
+    }
+
+    if (order.order_status === OrderStatus.Cancelled) {
+      return { message: 'Đơn hàng đã bị hủy trước đó' };
+    }
+
+    if (order.order_status !== OrderStatus.New) {
+      throw new ForbiddenException('Hiện không thể hủy đơn hàng.');
+    }
+
+    order.order_status = OrderStatus.Cancelled;
+
+    await order.save();
+
+    return { message: 'Đã hủy đơn hàng thành công', order };
   }
 }

@@ -11,6 +11,9 @@ export class Category {
   @Prop()
   image: string;
 
+  @Prop()
+  is_show_on_dashboard: boolean;
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   created_by: mongoose.Schema.Types.ObjectId;
 

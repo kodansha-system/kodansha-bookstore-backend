@@ -46,6 +46,14 @@ export class ReviewsController {
     return this.reviewsService.findOne(id);
   }
 
+  @Patch(':id/verify')
+  async verifyReview(
+    @Param('id') id: string,
+    @Body('is_verified') isVerified: boolean,
+  ) {
+    return this.reviewsService.verifiedReview(id, isVerified);
+  }
+
   @Patch(':id')
   @UseInterceptors(FileInterceptor('image'))
   update(

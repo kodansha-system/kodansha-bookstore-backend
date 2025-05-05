@@ -14,6 +14,7 @@ import { FilesService } from 'src/files/files.service';
 import { Order, OrderDocument } from 'src/orders/schemas/order.schema';
 import { OrderStatus } from 'src/utils/enums';
 import { Book, BookDocument } from 'src/books/schemas/book.schema';
+import { Types } from 'mongoose';
 @Injectable()
 export class ReviewsService {
   constructor(
@@ -147,40 +148,34 @@ export class ReviewsService {
   }
 
   async findAll(query) {
-    const { filter, sort, population, projection } = aqp(query);
+    const { current = 1, pageSize = 10, keyword, ...restQuery } = query;
 
-    // Lưu lại current page và page size trước khi xoá khỏi filter
-    const currentPage = +filter?.current || 1;
-    const pageSize = +filter?.pageSize || 10;
+    const offset = (+current - 1) * +pageSize;
+    const defaultLimit = +pageSize || 10;
 
-    const offset = (currentPage - 1) * pageSize;
+    const { filter, sort, population, projection } = aqp(restQuery);
 
-    // Xoá các key không liên quan đến truy vấn filter
-    delete filter?.current;
-    delete filter?.pageSize;
+    // Nếu có keyword thì tìm theo content
+    if (keyword) {
+      filter.$or = [{ content: { $regex: keyword, $options: 'i' } }];
+    }
 
-    // Đếm tổng số item thỏa điều kiện filter
     const totalItems = await this.reviewModel.countDocuments(filter);
-    const totalPages = Math.ceil(totalItems / pageSize);
+    const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    // Truy vấn dữ liệu theo phân trang
     const result = await this.reviewModel
       .find(filter)
       .skip(offset)
-      .limit(pageSize)
-      .populate({
-        path: 'created_by',
-        select: 'image name',
-      })
+      .limit(defaultLimit)
+      .populate({ path: 'created_by', select: 'image name' })
       .select(projection)
-      .sort('-createdAt')
+      .sort((sort as any) || '-createdAt')
       .exec();
 
-    // Trả kết quả
     return {
       meta: {
-        currentPage,
-        pageSize,
+        currentPage: +current,
+        pageSize: defaultLimit,
         totalItems,
         totalPages,
       },
@@ -207,6 +202,13 @@ export class ReviewsService {
         },
       },
     ]);
+  }
+
+  async verifiedReview(id: string, isVerified: boolean) {
+    return this.reviewModel.updateOne(
+      { _id: new Types.ObjectId(id) },
+      { $set: { is_verified: isVerified } },
+    );
   }
 
   async update(

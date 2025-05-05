@@ -42,6 +42,12 @@ export class CategoriesController {
   }
 
   @Public()
+  @Get('/show-on-dashboard')
+  findListShowOnDashboard(@Param('id') id: string) {
+    return this.categoriesService.findListShowOnDashboard();
+  }
+
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.categoriesService.findOne(id);

@@ -91,6 +91,14 @@ export class CategoriesService {
     ]);
   }
 
+  async findListShowOnDashboard() {
+    const data = await this.categoryModel.find({
+      is_show_on_dashboard: true,
+    });
+    console.log(data);
+    return data;
+  }
+
   async update(
     id: string,
     updateCategoryDto: UpdateCategoryDto,

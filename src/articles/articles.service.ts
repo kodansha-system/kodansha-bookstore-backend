@@ -41,12 +41,24 @@ export class ArticlesService {
   }
 
   async findAll(query) {
-    const { current = 1, pageSize = 10, keyword, ...restQuery } = query;
+    const {
+      current = 1,
+      pageSize = 10,
+      keyword,
+      get_all,
+      ...restQuery
+    } = query;
+
+    const isGetAll = get_all === 'true';
+
+    if ('get_all' in restQuery) {
+      delete restQuery.get_all;
+    }
 
     const offset = (+current - 1) * +pageSize;
     const defaultLimit = +pageSize || 10;
 
-    const { filter, sort, population, projection } = aqp(restQuery);
+    const { filter, sort, projection } = aqp(restQuery);
 
     // Nếu có keyword thì tìm theo title hoặc content
     if (keyword) {
@@ -59,21 +71,24 @@ export class ArticlesService {
     const totalItems = await this.articleModel.countDocuments(filter);
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    const result = await this.articleModel
+    const queryBuilder = this.articleModel
       .find(filter)
-      .skip(offset)
-      .limit(defaultLimit)
       .sort(sort as any)
       .populate({ path: 'created_by', select: 'name' })
-      .select(projection)
-      .exec();
+      .select(projection);
+
+    if (!isGetAll) {
+      queryBuilder.skip(offset).limit(defaultLimit);
+    }
+
+    const result = await queryBuilder.exec();
 
     return {
       meta: {
-        currentPage: +current,
-        pageSize: defaultLimit,
+        currentPage: isGetAll ? 1 : +current,
+        pageSize: isGetAll ? totalItems : defaultLimit,
         totalItems,
-        totalPages,
+        totalPages: isGetAll ? 1 : totalPages,
       },
       articles: result,
     };

@@ -3,7 +3,6 @@ import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Order, OrderSchema } from './schemas/order.schema';
-import { PayosModule } from 'src/payos/payos.module';
 import { OrdersScheduler } from './orders.scheduler';
 import {
   FlashSale,
@@ -14,6 +13,7 @@ import {
   ShopBook,
   ShopBookSchema,
 } from 'src/shop_books/schemas/shop-book.schema';
+import { PayosModule } from 'src/payos/payos.module';
 
 @Module({
   imports: [

@@ -11,6 +11,7 @@ import {
   DeliveryMethod,
   Order,
   OrderDocument,
+  PaymentMethod,
   PaymentStatus,
 } from './schemas/order.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
@@ -18,7 +19,6 @@ import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import { OrderStatus } from 'src/utils/enums';
 import { ConfigService } from '@nestjs/config';
-import { PayosService } from 'src/payos/payos.service';
 import {
   FlashSale,
   FlashSaleDocument,
@@ -29,8 +29,12 @@ import {
   ShopBook,
   ShopBookDocument,
 } from 'src/shop_books/schemas/shop-book.schema';
+import axios, { AxiosInstance } from 'axios';
+import { PayosService } from 'src/payos/payos.service';
 @Injectable()
 export class OrdersService {
+  private apiShipping: AxiosInstance;
+
   constructor(
     @InjectModel(Order.name)
     private orderModel: SoftDeleteModel<OrderDocument>,
@@ -47,7 +51,19 @@ export class OrdersService {
     private configService: ConfigService,
 
     private readonly payosService: PayosService,
-  ) {}
+  ) {
+    const token = this.configService.get<string>('SHIPPING_API_TOKEN');
+    const shippingUrl = this.configService.get<string>('SHIPPING_BASE_URL');
+
+    this.apiShipping = axios.create({
+      baseURL: shippingUrl,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      timeout: 10000,
+    });
+  }
 
   async handleCheckFlashSaleActive(
     flash_sale_id: any,
@@ -110,13 +126,10 @@ export class OrdersService {
 
       // Luôn trừ trong kho thật
       if (delivery_method === DeliveryMethod.HOME_DELIVERY) {
-        console.log(item.quantity);
-        const modifiedItem = await this.bookModel.updateOne(
+        await this.bookModel.updateOne(
           { _id: new Types.ObjectId(item.book_id) },
           { $inc: { quantity: -item.quantity } },
         );
-
-        console.log(modifiedItem, 'modified item');
       }
 
       if (delivery_method === DeliveryMethod.STORE_PICKUP) {
@@ -197,6 +210,7 @@ export class OrdersService {
 
   async create(createOrderDto: CreateOrderDto, user: IUserBody) {
     const delivery_method = createOrderDto.delivery_method;
+    const payment_method = createOrderDto.payment_method;
     const payment_expire_at = new Date(Date.now() + 5 * 60 * 1000);
 
     if (createOrderDto?.flash_sale_id) {
@@ -218,8 +232,23 @@ export class OrdersService {
         Date.now() + 7 * 24 * 60 * 60 * 1000,
       );
 
+      let paymentResponse;
+      const orderCode = Number(`${Date.now()}`.slice(-10));
+
+      if (payment_method === PaymentMethod.ONLINE) {
+        paymentResponse = await this.payosService.createPaymentLink({
+          orderCode,
+          amount: createOrderDto.total_to_pay,
+          description: String(orderCode),
+          returnUrl: 'http://localhost:3000/my-order',
+          cancelUrl: 'http://localhost:3000/my-order',
+          expiredAt: Math.floor((Date.now() + 10 * 60 * 1000) / 1000),
+        });
+      }
+
       const order = await this.orderModel.create({
         ...createOrderDto,
+        order_code: orderCode,
         user_id: user?._id,
         order_status: OrderStatus.New,
         payment_status: PaymentStatus.PENDING,
@@ -233,6 +262,7 @@ export class OrdersService {
         ...(createOrderDto.payment_method === 'online' && {
           payment_expire_at,
         }),
+        ...(paymentResponse && { payment_link: paymentResponse?.checkoutUrl }),
       });
 
       await this.updateQuantitiesAfterOrder(
@@ -246,8 +276,23 @@ export class OrdersService {
     }
 
     if (delivery_method === DeliveryMethod.HOME_DELIVERY) {
+      let paymentResponse;
+      const orderCode = Number(`${Date.now()}`.slice(-10));
+
+      if (payment_method === PaymentMethod.ONLINE) {
+        paymentResponse = await this.payosService.createPaymentLink({
+          orderCode,
+          amount: createOrderDto.total_to_pay,
+          description: 'kodansha',
+          returnUrl: 'http://localhost:3000/my-order',
+          cancelUrl: 'http://localhost:3000/my-order',
+          expiredAt: Math.floor((Date.now() + 5 * 60 * 1000) / 1000),
+        });
+      }
+
       const order = await this.orderModel.create({
         ...createOrderDto,
+        order_code: orderCode,
         user_id: user?._id,
         order_status: OrderStatus.New,
         payment_status: PaymentStatus.PENDING,
@@ -259,6 +304,9 @@ export class OrdersService {
         ],
         ...(createOrderDto.payment_method === 'online' && {
           payment_expire_at,
+          ...(paymentResponse && {
+            payment_link: paymentResponse?.checkoutUrl,
+          }),
         }),
       });
 
@@ -271,16 +319,6 @@ export class OrdersService {
 
       return { order };
     }
-    // const paymentLink = await this.payosService.createPaymentLink({
-    //   orderCode: Number(`${Date.now()}`.slice(-10)),
-    //   amount: 2000,
-    //   description: 'kodansha1',
-    //   returnUrl: 'http://localhost:3000/payment-result?status=success',
-    //   cancelUrl: 'http://localhost:3000/cart',
-    //   expiredAt: expirationTime,
-    // });
-
-    return 'ok';
   }
 
   async findAll(query) {
@@ -370,6 +408,51 @@ export class OrdersService {
     }
   }
 
+  private async createGoshipShipment(order: any) {
+    try {
+      const address = order.delivery_address;
+
+      const res = await this.apiShipping.post('/shipments', {
+        shipment: {
+          order_id: order._id,
+          rate: order.carrier.id,
+          address_from: {
+            city: '700000',
+            district: '700100',
+            ward: 8955,
+            street: 'Đường Nguyễn Trãi',
+            name: 'Kodansha',
+            phone: '09342391',
+          },
+          address_to: {
+            city: address?.city,
+            district: address?.district,
+            ward: address?.ward,
+            street: address?.street,
+            name: address?.customer_name,
+            phone: address?.phone_number,
+          },
+          parcel: {
+            cod: order.total_to_pay,
+            amount: order.total_to_pay,
+            width: order.parcel.width,
+            height: order.parcel.height,
+            length: order.parcel.length,
+            weight: order.parcel.weight,
+          },
+        },
+      });
+
+      return res;
+    } catch (error) {
+      console.log('Lỗi khi tạo đơn:', error);
+
+      throw new BadRequestException(
+        'Không thể tạo đơn hàng với đối tác vận chuyển ',
+      );
+    }
+  }
+
   async updateOrderStatus(id: string, status: number) {
     try {
       const order = await this.orderModel.findById(id);
@@ -381,7 +464,15 @@ export class OrdersService {
         (item) => String(item.status) === String(status),
       );
 
-      if (!statusExists) {
+      if (order.order_status > status) {
+        return new BadRequestException('Trạng thái cập nhật không hợp lệ');
+      }
+
+      if (!statusExists && order.order_status < status) {
+        if (status === OrderStatus.Verified) {
+          await this.createGoshipShipment(order);
+        }
+
         order.tracking_order.push({
           status,
           time: new Date(),
@@ -430,8 +521,20 @@ export class OrdersService {
 
     order.order_status = OrderStatus.Cancelled;
 
+    if (cancelOrderDto.note) {
+      order.note = cancelOrderDto.note;
+    }
+
     await order.save();
 
     return { message: 'Đã hủy đơn hàng thành công', order };
+  }
+
+  async updatePaymentStatus(orderCode: string, status: string) {
+    return this.orderModel.findOneAndUpdate(
+      { order_code: orderCode },
+      { payment_status: status },
+      { new: true },
+    );
   }
 }

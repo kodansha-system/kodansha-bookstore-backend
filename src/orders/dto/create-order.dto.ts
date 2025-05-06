@@ -49,6 +49,26 @@ class CarrierDto {
   fee: number;
 }
 
+class ParcelDto {
+  @IsString()
+  width: string;
+
+  @IsString()
+  height: string;
+
+  @IsString()
+  length: string;
+
+  @IsString()
+  weight: string;
+
+  @IsNumber()
+  cod: number;
+
+  @IsNumber()
+  amount: number;
+}
+
 class TrackingDto {
   @IsString()
   time: Date;
@@ -57,6 +77,9 @@ class TrackingDto {
   status: string;
 }
 export class CreateOrderDto {
+  @IsOptional()
+  order_code: number;
+
   user_id: Types.ObjectId;
 
   @IsOptional()
@@ -121,5 +144,12 @@ export class CreateOrderDto {
   payment_status: PaymentStatus;
 
   @IsOptional()
+  payment_link: string;
+
+  @IsOptional()
   note: string;
+
+  @ValidateNested()
+  @Type(() => ParcelDto)
+  parcel: ParcelDto;
 }

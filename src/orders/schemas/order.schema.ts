@@ -37,17 +37,21 @@ export class Carrier {
 
 @Schema({ timestamps: true })
 export class Order {
+  @Prop()
+  order_code: number;
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   user_id: Types.ObjectId;
 
   @Prop({ type: Object })
   delivery_address: {
     street: string;
-    ward_id: string;
+    full_address: string;
+    ward: string;
     ward_name: string;
-    district_id: string;
+    district: string;
     district_name: string;
-    province_id: string;
+    city: string;
     province_name: string;
     phone: string;
     customer_name: string;
@@ -127,6 +131,19 @@ export class Order {
 
   @Prop()
   payment_expire_at: Date;
+
+  @Prop()
+  payment_link: string;
+
+  @Prop({ type: Object })
+  parcel: {
+    cod: number;
+    amount: number;
+    width: string;
+    height: string;
+    length: string;
+    weight: number;
+  };
 
   @Prop({ type: Object })
   created_by: {

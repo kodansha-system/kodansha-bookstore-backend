@@ -153,6 +153,10 @@ export class CartsService {
           price: 1,
           rating_average: 1,
           discount: 1,
+          width: 1,
+          height: 1,
+          length: 1,
+          weight: 1,
         },
       });
 

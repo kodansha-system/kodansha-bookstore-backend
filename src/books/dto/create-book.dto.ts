@@ -23,6 +23,9 @@ export class CreateBookDto {
   width: number;
 
   @IsNotEmpty()
+  length: number;
+
+  @IsNotEmpty()
   height: number;
 
   @IsNotEmpty()

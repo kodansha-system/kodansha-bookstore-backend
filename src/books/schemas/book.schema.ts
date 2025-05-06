@@ -38,6 +38,9 @@ export class Book {
   width: number;
 
   @Prop()
+  length: number;
+
+  @Prop()
   height: number;
 
   @Prop()

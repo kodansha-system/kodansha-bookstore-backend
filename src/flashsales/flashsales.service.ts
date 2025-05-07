@@ -120,4 +120,48 @@ export class FlashSaleService {
       flash_sale_id: flashSale._id,
     };
   }
+
+  async updateFlashSale(id: string, updateDto: CreateFlashSaleDto) {
+    const now = new Date();
+    const start = new Date(updateDto.start_time);
+    const end = new Date(updateDto.end_time);
+
+    const flashSale = await this.flashSaleModel.findById(id);
+    if (!flashSale) throw new NotFoundException('Flash sale không tồn tại');
+
+    if (flashSale.start_time <= now) {
+      throw new BadRequestException(
+        'Chỉ được cập nhật flash sale chưa diễn ra.',
+      );
+    }
+
+    if (start <= now) {
+      throw new BadRequestException(
+        'Thời gian bắt đầu phải nằm trong tương lai.',
+      );
+    }
+
+    if (end <= start) {
+      throw new BadRequestException(
+        'Thời gian kết thúc phải sau thời gian bắt đầu.',
+      );
+    }
+
+    const isConflict = await this.flashSaleModel.exists({
+      _id: { $ne: id },
+      $or: [
+        {
+          start_time: { $lt: end },
+          end_time: { $gt: start },
+        },
+      ],
+    });
+
+    if (isConflict) {
+      throw new BadRequestException('Thời gian này đã có flash sale khác.');
+    }
+
+    flashSale.set(updateDto);
+    return flashSale.save();
+  }
 }

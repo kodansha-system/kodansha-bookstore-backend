@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Patch,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { FlashSaleService } from './flashsales.service';
 import { CreateFlashSaleDto } from './dto/create-flashsale.dto';
@@ -39,6 +47,14 @@ export class FlashSaleController {
     @Body() body: { bookId: string; quantity: number },
   ) {
     return this.flashSaleService.buy(flashSaleId, body.bookId, body.quantity);
+  }
+
+  @Patch(':id')
+  updateFlashSale(
+    @Param('id') flashSaleId: string,
+    @Body() updateDto: CreateFlashSaleDto,
+  ) {
+    return this.flashSaleService.updateFlashSale(flashSaleId, updateDto);
   }
 
   @Delete(':id')

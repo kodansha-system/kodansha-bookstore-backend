@@ -6,7 +6,7 @@ export class CreateBookDto {
   authors: mongoose.Schema.Types.ObjectId[];
 
   @IsNotEmpty()
-  categories: mongoose.Schema.Types.ObjectId[];
+  category_id: mongoose.Schema.Types.ObjectId;
 
   @IsNotEmpty()
   name: string;

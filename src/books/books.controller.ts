@@ -42,6 +42,7 @@ export class BooksController {
     @Query('authorId') authorId: string,
     @Query('sortPrice') sortPrice: 'asc' | 'desc',
     @Query('ratingGte') ratingGte: string,
+    @Query('get_all') isGetAll: boolean,
     @Query('page') page: string,
     @Query('limit') limit: string,
   ) {
@@ -51,6 +52,7 @@ export class BooksController {
       authorId,
       sortPrice,
       ratingGte ? parseFloat(ratingGte) : undefined,
+      isGetAll,
       +page ? parseInt(page) : 1,
       +limit ? parseInt(limit) : 10,
     );

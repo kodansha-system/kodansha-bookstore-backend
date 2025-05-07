@@ -177,9 +177,14 @@ export class BooksService {
     authorId?: string | string[],
     sortPrice?: 'asc' | 'desc',
     ratingGte?: number,
+    isGetAll?: boolean,
     page = 1,
     limit = 10,
   ) {
+    if (isGetAll) {
+      return await this.bookModel.find({}).exec();
+    }
+
     const pipeline: any[] = [];
     const matchStage: any = {};
 
@@ -245,6 +250,19 @@ export class BooksService {
         foreignField: '_id',
         as: 'authorDetails',
       },
+    });
+
+    pipeline.push({
+      $lookup: {
+        from: 'categories',
+        localField: 'category_id',
+        foreignField: '_id',
+        as: 'category',
+      },
+    });
+
+    pipeline.push({
+      $unwind: '$category',
     });
 
     if (keyword) {

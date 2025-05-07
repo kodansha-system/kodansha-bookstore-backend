@@ -4,6 +4,7 @@ import {
   IsDateString,
   IsInt,
   IsMongoId,
+  IsOptional,
   IsString,
   Min,
   ValidateNested,
@@ -38,5 +39,7 @@ class FlashSaleBookDto {
   price: number;
 
   @IsInt()
-  sold: number;
+  @IsOptional()
+  @Min(0)
+  sold?: number = 0;
 }

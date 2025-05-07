@@ -20,7 +20,7 @@ export class Book {
   authors: mongoose.Schema.Types.ObjectId[];
 
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }] })
-  categories: mongoose.Schema.Types.ObjectId[];
+  category_id: mongoose.Schema.Types.ObjectId;
 
   @Prop()
   name: string;

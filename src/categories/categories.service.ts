@@ -40,20 +40,41 @@ export class CategoriesService {
 
   async findAll(query) {
     const { filter, sort, population, projection } = aqp(query);
+    delete filter.get_all;
+    const getAll = query.get_all === true;
 
-    const offset = (+filter?.current - 1) * filter?.pageSize;
-    const defaultLimit = +filter?.pageSize || 10;
+    const resultQuery = this.categoryModel.find(filter);
 
-    delete filter?.current;
-    delete filter?.pageSize;
+    if (!getAll) {
+      const offset = (+filter?.current - 1) * filter?.pageSize;
+      const defaultLimit = +filter?.pageSize || 10;
 
-    const totalItems = (await this.categoryModel.find(filter)).length;
-    const totalPages = Math.ceil(totalItems / defaultLimit);
+      delete filter?.current;
+      delete filter?.pageSize;
 
-    const result = await this.categoryModel
-      .find(filter)
-      .skip(offset)
-      .limit(defaultLimit)
+      const totalItems = await this.categoryModel.countDocuments(filter);
+      const totalPages = Math.ceil(totalItems / defaultLimit);
+
+      const result = await resultQuery
+        .skip(offset)
+        .limit(defaultLimit)
+        .sort(sort as any)
+        .populate(population)
+        .select(projection)
+        .exec();
+
+      return {
+        meta: {
+          currentPage: +query.current || 1,
+          pageSize: defaultLimit,
+          totalItems,
+          totalPages,
+        },
+        categories: result,
+      };
+    }
+
+    const allResult = await resultQuery
       .sort(sort as any)
       .populate(population)
       .select(projection)
@@ -61,12 +82,9 @@ export class CategoriesService {
 
     return {
       meta: {
-        currentPage: filter?.current || 1,
-        pageSize: defaultLimit,
-        totalItems,
-        totalPages,
+        totalItems: allResult.length,
       },
-      categories: result,
+      categories: allResult,
     };
   }
 

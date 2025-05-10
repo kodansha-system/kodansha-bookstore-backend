@@ -41,6 +41,7 @@ import { FlashSalesModule } from './flashsales/flashsales.module';
 import { ArticlesModule } from './articles/articles.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { PayosWebhookModule } from './payos-webhook/payos-webhook.module';
+import { StatisticsModule } from './statistics/statistic.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -120,6 +121,8 @@ import { PayosWebhookModule } from './payos-webhook/payos-webhook.module';
     ReviewsModule,
 
     PayosWebhookModule,
+
+    StatisticsModule,
 
     ScheduleModule.forRoot(),
 

@@ -122,7 +122,7 @@ export class BooksService {
         select: 'name',
       },
       {
-        path: 'categories',
+        path: 'category_id',
         select: 'name',
       },
     ]);

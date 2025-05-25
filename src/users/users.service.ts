@@ -33,8 +33,13 @@ export class UsersService {
     created_by: IUser,
     file?: Express.Multer.File,
   ) {
-    const { password } = createUserDto;
+    const { password, email } = createUserDto;
     const hashPassword = this.getHashPassword(password);
+
+    const existingUser = await this.userModel.findOne({ email });
+    if (existingUser) {
+      throw new BadRequestException('Email đã tồn tại');
+    }
 
     if (file) {
       this.fileService.validateFile(file);
@@ -76,61 +81,61 @@ export class UsersService {
   }
 
   async findAll(query) {
-    const { filter, sort, population, projection } = aqp(query);
+    const {
+      keyword,
+      current = 1,
+      pageSize = 10,
+      sort = { createdAt: -1 },
+    } = query;
 
-    const offset = (+filter?.current - 1) * filter?.pageSize;
-    const defaultLimit = +filter?.pageSize || 10;
+    const filter: Record<string, any> = {};
 
-    delete filter?.current;
-    delete filter?.pageSize;
+    if (keyword) {
+      const regex = { $regex: keyword, $options: 'i' };
+      filter.$or = [{ name: regex }, { email: regex }, { phone_number: regex }];
+    }
 
-    const totalItems = (await this.userModel.find(filter)).length;
-    const totalPages = Math.ceil(totalItems / defaultLimit);
+    const offset = (+current - 1) * +pageSize;
 
-    const result = await this.userModel
+    const totalItems = await this.userModel.countDocuments(filter);
+    const totalPages = Math.ceil(totalItems / +pageSize);
+
+    const users = await this.userModel
       .find(filter)
       .skip(offset)
-      .limit(defaultLimit)
-      .sort(sort as any)
+      .limit(+pageSize)
+      .sort(sort)
       .populate({
         path: 'role',
         select: 'name',
       })
-      // .projection(projection)
       .exec();
 
     return {
       meta: {
-        currentPage: filter?.current || 1,
-        pageSize: defaultLimit,
+        currentPage: +current,
+        pageSize: +pageSize,
         totalItems,
         totalPages,
       },
-      users: result,
+      users,
     };
   }
 
   findOne(id: string) {
-    return this.userModel.findById(id).populate({
-      path: 'role',
-      select: { name: 1, permissions: 1 },
-      populate: { path: 'permissions', select: { name: 1 } },
-    });
+    return this.userModel.findById(id).select('-password');
   }
 
   async getUserInfor(id: string) {
-    const infor = await this.userModel.findById(id).select('-password');
-    return infor;
+    const infor: any = await this.userModel.findById(id).select('-password');
+    console.log(infor, 'check infor ', id);
+    return infor?._doc;
   }
 
   async findOneByUsername(username: string) {
     return await this.userModel
       .findOne({
         $or: [{ email: username }, { username: username }],
-      })
-      .populate({
-        path: 'role',
-        select: { name: 1 },
       })
       .select('+password')
       .exec();

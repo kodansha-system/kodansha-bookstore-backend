@@ -118,7 +118,7 @@ export class CartsService {
           images: 1,
           price: 1,
           rating_average: 1,
-          discount: 1,
+          origin_price: 1,
         },
       })
       .select(projection)
@@ -138,7 +138,13 @@ export class CartsService {
   async findOne(id: string) {
     const cart = await this.cartModel.findOne({ user_id: id }).populate({
       path: 'books.book_id',
-      select: { name: 1, images: 1, price: 1, rating_average: 1, discount: 1 },
+      select: {
+        name: 1,
+        images: 1,
+        price: 1,
+        rating_average: 1,
+        origin_price: 1,
+      },
     });
   }
 
@@ -152,7 +158,7 @@ export class CartsService {
           images: 1,
           price: 1,
           rating_average: 1,
-          discount: 1,
+          origin_price: 1,
           width: 1,
           height: 1,
           length: 1,

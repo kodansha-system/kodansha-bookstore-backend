@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber } from 'class-validator';
 import mongoose from 'mongoose';
 
@@ -10,6 +11,9 @@ export class CreateBookDto {
 
   @IsNotEmpty()
   name: string;
+
+  @IsNotEmpty()
+  description: string;
 
   images: Express.Multer.File[];
 
@@ -41,8 +45,9 @@ export class CreateBookDto {
   price: number;
 
   @IsNotEmpty()
-  discount: number;
+  origin_price: number;
 
   @IsNumber()
+  @Type(() => Number)
   quantity: number;
 }

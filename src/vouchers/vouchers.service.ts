@@ -26,8 +26,12 @@ export class VouchersService {
 
   async getListVoucherForOrder(order) {
     try {
+      const now = new Date();
+
       const vouchers = await this.voucherModel.find({
         min_order_total_price: { $lt: order.price },
+        start_time: { $lte: now },
+        end_time: { $gte: now },
       });
 
       return vouchers;
@@ -44,7 +48,20 @@ export class VouchersService {
 
     delete filter?.current;
     delete filter?.pageSize;
+    const keyword =
+      typeof filter?.keyword === 'string' ? filter.keyword.trim() : '';
 
+    // Xoá để tránh lỗi khi dùng trong filter
+    delete filter.current;
+    delete filter.pageSize;
+    delete filter.keyword;
+
+    if (keyword) {
+      filter.$or = [
+        { code: { $regex: keyword, $options: 'i' } },
+        { description: { $regex: keyword, $options: 'i' } },
+      ];
+    }
     const totalItems = (await this.voucherModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
@@ -52,7 +69,7 @@ export class VouchersService {
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
-      .sort(sort as any)
+      .sort('-createdAt')
       .populate(population)
       .select(projection)
       .exec();
@@ -94,8 +111,8 @@ export class VouchersService {
     return this.voucherModel.updateOne(
       { _id: id },
       {
-        deleted_by: user,
-        isDeleted: true,
+        quantity: 0,
+        deleted_by: user._id,
       },
     );
   }

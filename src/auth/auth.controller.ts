@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public, ResponseMessage } from 'src/decorator/customize';
-import { LocalAuthGuard } from './local-auth.guard';
+import { LocalAuthGuard, LocalAuthStaffGuard } from './local-auth.guard';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { RolesService } from 'src/roles/roles.service';
 import { ThrottlerGuard } from '@nestjs/throttler';
@@ -40,6 +40,14 @@ export class AuthController {
   @Post('/login')
   async login(@Request() req, @Res({ passthrough: true }) response) {
     return this.authService.login(req.user, response);
+  }
+
+  @Public()
+  @Post('login-staff')
+  @UseGuards(LocalAuthStaffGuard)
+  @ApiBody({ type: UserLoginDto })
+  async loginStaff(@Request() req, @Res({ passthrough: true }) res) {
+    return this.authService.login(req.user, res);
   }
 
   @Get('/profile')

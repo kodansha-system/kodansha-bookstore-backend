@@ -14,6 +14,7 @@ import {
   ShopBookSchema,
 } from 'src/shop_books/schemas/shop-book.schema';
 import { PayosModule } from 'src/payos/payos.module';
+import { Voucher, VoucherSchema } from 'src/vouchers/schemas/voucher.schema';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { PayosModule } from 'src/payos/payos.module';
       { name: FlashSale.name, schema: FlashSaleSchema },
       { name: Book.name, schema: BookSchema },
       { name: ShopBook.name, schema: ShopBookSchema },
+      { name: Voucher.name, schema: VoucherSchema },
     ]),
     PayosModule,
   ],

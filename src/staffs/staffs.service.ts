@@ -108,15 +108,9 @@ export class StaffsService {
     });
   }
 
-  async findOneByStaffname(staffname: string) {
+  async findOneByStaffEmail(email: string) {
     return await this.staffModel
-      .findOne({
-        $or: [{ email: staffname }, { staffname: staffname }],
-      })
-      .populate({
-        path: 'role',
-        select: { name: 1 },
-      })
+      .findOne({ email: email })
       .select('+password')
       .exec();
   }

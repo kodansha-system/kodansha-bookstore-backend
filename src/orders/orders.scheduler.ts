@@ -4,7 +4,7 @@ import { Cron } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { OrderStatus } from 'src/utils/enums';
-import { Order, PaymentMethod, PaymentStatus } from './schemas/order.schema';
+import { Order, PaymentStatus } from './schemas/order.schema';
 import { OrdersService } from './orders.service';
 
 @Injectable()

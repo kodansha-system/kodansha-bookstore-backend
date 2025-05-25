@@ -33,10 +33,6 @@ export class CreateStaffDto {
   @IsArray()
   @IsOptional()
   address: string[];
-
-  @IsNotEmpty({ message: 'Role không dc để trống' })
-  @IsMongoId()
-  role: mongoose.Schema.Types.ObjectId;
 }
 
 export class RegisterStaffDto {

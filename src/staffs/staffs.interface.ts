@@ -34,3 +34,8 @@ export enum AccType {
   FACEBOOK = 'facebook',
   GOOGLE = 'google',
 }
+
+export enum StaffRole {
+  ADMIN = 'admin',
+  STAFF = 'staff',
+}

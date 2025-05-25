@@ -7,6 +7,7 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import { FilesService } from 'src/files/files.service';
+import { populate } from 'dotenv';
 @Injectable()
 export class ShopsService {
   constructor(
@@ -39,32 +40,52 @@ export class ShopsService {
   }
 
   async findAll(query) {
-    const { filter, sort, population, projection } = aqp(query);
+    const {
+      current = 1,
+      pageSize = 10,
+      keyword,
+      get_all,
+      ...restQuery
+    } = query;
 
-    const offset = (+filter?.current - 1) * filter?.pageSize;
-    const defaultLimit = +filter?.pageSize || 10;
+    const isGetAll = get_all === 'true';
 
-    delete filter?.current;
-    delete filter?.pageSize;
+    if ('get_all' in restQuery) {
+      delete restQuery.get_all;
+    }
 
-    const totalItems = (await this.shopModel.find(filter)).length;
+    const offset = (+current - 1) * +pageSize;
+    const defaultLimit = +pageSize || 10;
+
+    const { filter, sort, projection } = aqp(restQuery);
+
+    if (keyword) {
+      filter.$or = [
+        { description: { $regex: keyword, $options: 'i' } },
+        { address: { $regex: keyword, $options: 'i' } },
+      ];
+    }
+
+    const totalItems = await this.shopModel.countDocuments(filter);
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    const result = await this.shopModel
+    const queryBuilder = this.shopModel
       .find(filter)
-      .skip(offset)
-      .limit(defaultLimit)
-      .sort(sort as any)
-      .populate(population)
-      .select(projection)
-      .exec();
+      .sort('-createdAt')
+      .select(projection);
+
+    if (!isGetAll) {
+      queryBuilder.skip(offset).limit(defaultLimit);
+    }
+
+    const result = await queryBuilder.exec();
 
     return {
       meta: {
-        currentPage: filter?.current || 1,
-        pageSize: defaultLimit,
+        currentPage: isGetAll ? 1 : +current,
+        pageSize: isGetAll ? totalItems : defaultLimit,
         totalItems,
-        totalPages,
+        totalPages: isGetAll ? 1 : totalPages,
       },
       shops: result,
     };

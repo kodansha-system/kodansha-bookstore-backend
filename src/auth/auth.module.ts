@@ -13,10 +13,20 @@ import { FacebookStrategy } from './passport/facebook.strategy';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Role, RoleSchema } from 'src/roles/schemas/role.schema';
 import { User, UserSchema } from 'src/users/schemas/user.schema';
+import { LocalStaffStrategy } from './passport/local-staff.strategy';
+import { Staff, StaffSchema } from 'src/staffs/schemas/staff.schema';
+import { StaffsModule } from 'src/staffs/staffs.module';
 @Module({
-  providers: [AuthService, LocalStrategy, JwtStrategy, FacebookStrategy],
+  providers: [
+    AuthService,
+    LocalStrategy,
+    LocalStaffStrategy,
+    JwtStrategy,
+    FacebookStrategy,
+  ],
   imports: [
     UsersModule,
+    StaffsModule,
     RolesModule,
     PassportModule,
     JwtModule.registerAsync({
@@ -32,6 +42,7 @@ import { User, UserSchema } from 'src/users/schemas/user.schema';
     MongooseModule.forFeature([
       { name: Role.name, schema: RoleSchema },
       { name: User.name, schema: UserSchema },
+      { name: Staff.name, schema: StaffSchema },
     ]),
   ],
   controllers: [AuthController],

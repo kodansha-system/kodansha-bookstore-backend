@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateShopDto {
-  @IsNotEmpty()
+  @IsString()
   phone: string;
 
   @IsNotEmpty()
@@ -16,13 +16,13 @@ export class CreateShopDto {
   @IsNotEmpty()
   province_id: string;
 
-  @IsString()
+  @IsOptional()
   name: string;
 
-  @IsString()
+  @IsOptional()
   longitude: string;
 
-  @IsString()
+  @IsOptional()
   latitude: string;
 
   @IsString()

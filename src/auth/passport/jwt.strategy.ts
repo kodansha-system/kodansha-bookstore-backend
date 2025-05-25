@@ -19,14 +19,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: IUserBody) {
-    const { _id, email, name, role, facebook_id } = payload;
-    const temp = await this.roleService.findOne(role?.id);
+    const { _id, email, name, facebook_id } = payload;
+    console.log('chạy đây cơ ================================================');
     return {
       _id,
       email,
       name,
-      role,
-      permissions: temp?.permissions || [],
       type: AccType.NORMAL,
       facebook_id,
     };

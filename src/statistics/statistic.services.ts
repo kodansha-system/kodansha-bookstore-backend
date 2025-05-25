@@ -29,7 +29,7 @@ export class StatisticsService {
       this.orderModel.aggregate([
         {
           $match: {
-            createdAt: { $gte: fromDate, $lte: toDate },
+            updatedAt: { $gte: fromDate, $lte: toDate },
             order_status: OrderStatus.Completed,
           },
         },
@@ -53,7 +53,7 @@ export class StatisticsService {
       ]),
 
       this.orderModel.countDocuments({
-        createdAt: { $gte: fromDate, $lte: toDate },
+        updatedAt: { $gte: fromDate, $lte: toDate },
       }),
 
       this.orderModel.countDocuments({
@@ -64,7 +64,7 @@ export class StatisticsService {
       this.orderModel.aggregate([
         {
           $match: {
-            createdAt: { $gte: fromDate, $lte: toDate },
+            updatedAt: { $gte: fromDate, $lte: toDate },
             order_status: OrderStatus.Completed,
           },
         },
@@ -78,7 +78,7 @@ export class StatisticsService {
               ],
             },
             date: {
-              $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+              $dateToString: { format: '%Y-%m-%d', date: '$updatedAt' },
             },
           },
         },
@@ -101,7 +101,7 @@ export class StatisticsService {
       ]),
 
       this.customerModel.countDocuments({
-        createdAt: { $gte: fromDate, $lte: toDate },
+        updatedAt: { $gte: fromDate, $lte: toDate },
       }),
     ]);
 

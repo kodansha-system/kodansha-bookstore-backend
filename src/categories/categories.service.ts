@@ -7,6 +7,7 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUserBody } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import { FilesService } from 'src/files/files.service';
+import { Book, BookDocument } from 'src/books/schemas/book.schema';
 @Injectable()
 export class CategoriesService {
   constructor(
@@ -14,6 +15,9 @@ export class CategoriesService {
     private categoryModel: SoftDeleteModel<CategoryDocument>,
 
     private fileService: FilesService,
+
+    @InjectModel(Book.name)
+    private bookModel: SoftDeleteModel<BookDocument>,
   ) {}
 
   async create(
@@ -39,52 +43,52 @@ export class CategoriesService {
   }
 
   async findAll(query) {
-    const { filter, sort, population, projection } = aqp(query);
-    delete filter.get_all;
-    const getAll = query.get_all === true;
+    const {
+      current = 1,
+      pageSize = 10,
+      keyword,
+      get_all,
+      ...restQuery
+    } = query;
 
-    const resultQuery = this.categoryModel.find(filter);
+    const isGetAll = get_all === 'true';
 
-    if (!getAll) {
-      const offset = (+filter?.current - 1) * filter?.pageSize;
-      const defaultLimit = +filter?.pageSize || 10;
-
-      delete filter?.current;
-      delete filter?.pageSize;
-
-      const totalItems = await this.categoryModel.countDocuments(filter);
-      const totalPages = Math.ceil(totalItems / defaultLimit);
-
-      const result = await resultQuery
-        .skip(offset)
-        .limit(defaultLimit)
-        .sort(sort as any)
-        .populate(population)
-        .select(projection)
-        .exec();
-
-      return {
-        meta: {
-          currentPage: +query.current || 1,
-          pageSize: defaultLimit,
-          totalItems,
-          totalPages,
-        },
-        categories: result,
-      };
+    if ('get_all' in restQuery) {
+      delete restQuery.get_all;
     }
 
-    const allResult = await resultQuery
+    const offset = (+current - 1) * +pageSize;
+    const defaultLimit = +pageSize || 10;
+
+    const { filter, sort, projection } = aqp(restQuery);
+
+    if (keyword) {
+      filter.$or = [{ content: { $regex: keyword, $options: 'i' } }];
+    }
+
+    const totalItems = await this.categoryModel.countDocuments(filter);
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+
+    const queryBuilder = this.categoryModel
+      .find(filter)
       .sort(sort as any)
-      .populate(population)
-      .select(projection)
-      .exec();
+      .populate({ path: 'created_by', select: 'name' })
+      .select(projection);
+
+    if (!isGetAll) {
+      queryBuilder.skip(offset).limit(defaultLimit);
+    }
+
+    const result = await queryBuilder.exec();
 
     return {
       meta: {
-        totalItems: allResult.length,
+        currentPage: isGetAll ? 1 : +current,
+        pageSize: isGetAll ? totalItems : defaultLimit,
+        totalItems,
+        totalPages: isGetAll ? 1 : totalPages,
       },
-      categories: allResult,
+      categories: result,
     };
   }
 
@@ -145,7 +149,17 @@ export class CategoriesService {
     return updateCategory;
   }
 
-  remove(id: string, user: IUserBody) {
+  async remove(id: string, user: IUserBody) {
+    const bookCount = await this.bookModel.countDocuments({
+      category_id: id,
+    });
+
+    if (bookCount > 0) {
+      throw new BadRequestException(
+        `Không thể xóa vì có ${bookCount} sách đang thuộc thư mục này.`,
+      );
+    }
+
     return this.categoryModel.updateOne(
       { _id: id },
       {

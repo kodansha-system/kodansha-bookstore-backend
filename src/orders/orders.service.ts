@@ -31,6 +31,7 @@ import {
 } from 'src/shop_books/schemas/shop-book.schema';
 import axios, { AxiosInstance } from 'axios';
 import { PayosService } from 'src/payos/payos.service';
+import { Voucher, VoucherDocument } from 'src/vouchers/schemas/voucher.schema';
 @Injectable()
 export class OrdersService {
   private apiShipping: AxiosInstance;
@@ -47,6 +48,9 @@ export class OrdersService {
 
     @InjectModel(ShopBook.name)
     private shopBookModel: SoftDeleteModel<ShopBookDocument>,
+
+    @InjectModel(Voucher.name)
+    private voucherModel: SoftDeleteModel<VoucherDocument>,
 
     private configService: ConfigService,
 
@@ -209,6 +213,7 @@ export class OrdersService {
   }
 
   async create(createOrderDto: CreateOrderDto, user: IUserBody) {
+    console.log(createOrderDto?.vouchers, 'check data order');
     const delivery_method = createOrderDto.delivery_method;
     const payment_method = createOrderDto.payment_method;
     const payment_expire_at = new Date(Date.now() + 5 * 60 * 1000);
@@ -226,6 +231,44 @@ export class OrdersService {
       createOrderDto.shop_id,
       createOrderDto.flash_sale_id,
     );
+
+    // ✅ CHECK VOUCHERS
+    if (
+      Array.isArray(createOrderDto.vouchers) &&
+      createOrderDto.vouchers.length > 0
+    ) {
+      const voucherIds = createOrderDto.vouchers.map(
+        (id) => new Types.ObjectId(id.toString()),
+      );
+
+      const vouchers = await this.voucherModel.find({
+        _id: { $in: voucherIds },
+      });
+
+      if (vouchers.length !== voucherIds.length) {
+        throw new BadRequestException('Voucher không hợp lệ hoặc đã hết hạn');
+      }
+
+      const now = new Date();
+      for (const voucher of vouchers) {
+        if (voucher.quantity < 1) {
+          throw new BadRequestException(
+            `Voucher ${voucher.code} đã hết lượt sử dụng.`,
+          );
+        }
+        const endTime = new Date(voucher.end_time);
+        const startTime = new Date(voucher.start_time);
+        if (voucher.start_time && now < startTime) {
+          throw new BadRequestException(
+            `Thời gian sử dụng voucher ${voucher.code} chưa bắt đầu.`,
+          );
+        }
+
+        if (voucher.end_time && now > endTime) {
+          throw new BadRequestException(`Voucher ${voucher.code} đã hết hạn.`);
+        }
+      }
+    }
 
     if (delivery_method === DeliveryMethod.STORE_PICKUP) {
       const shop_pickup_expire_at = new Date(
@@ -264,6 +307,23 @@ export class OrdersService {
         }),
         ...(paymentResponse && { payment_link: paymentResponse?.checkoutUrl }),
       });
+
+      // ✅ UPDATE VOUCHER QUANTITY
+      const voucherIds = createOrderDto.vouchers.map(
+        (id) => new Types.ObjectId(id.toString()),
+      );
+
+      console.log('đơn hàng đây');
+      console.log(voucherIds, 'voucherIds');
+      if (
+        Array.isArray(createOrderDto.vouchers) &&
+        createOrderDto.vouchers.length > 0
+      ) {
+        await this.voucherModel.updateMany(
+          { _id: { $in: voucherIds } },
+          { $inc: { quantity: -1 } },
+        );
+      }
 
       await this.updateQuantitiesAfterOrder(
         createOrderDto.books,
@@ -309,6 +369,23 @@ export class OrdersService {
           }),
         }),
       });
+
+      // ✅ UPDATE VOUCHER QUANTITY
+      const voucherIds = createOrderDto.vouchers.map(
+        (id) => new Types.ObjectId(id.toString()),
+      );
+
+      console.log('đơn hàng đây');
+      console.log(voucherIds, 'voucherIds');
+      if (
+        Array.isArray(createOrderDto.vouchers) &&
+        createOrderDto.vouchers.length > 0
+      ) {
+        await this.voucherModel.updateMany(
+          { _id: { $in: voucherIds } },
+          { $inc: { quantity: -1 } },
+        );
+      }
 
       await this.updateQuantitiesAfterOrder(
         createOrderDto.books,

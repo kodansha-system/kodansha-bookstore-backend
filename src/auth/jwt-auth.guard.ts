@@ -60,6 +60,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       //   throw err || new UnauthorizedException('Không có quyền vào route này');
       // }
 
+      console.log(user, 'user nè');
+
       if (err || !user) {
         throw err || new UnauthorizedException('Token không hợp lệ');
       }

@@ -21,7 +21,6 @@ export class ArticlesService {
     user: IUserBody,
     file: Express.Multer.File,
   ) {
-    console.log(createArticleDto);
     this.fileService.validateFile(file);
 
     const image = await this.fileService.uploadImage(file).catch((e) => {

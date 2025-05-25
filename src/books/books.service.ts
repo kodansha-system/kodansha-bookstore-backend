@@ -134,31 +134,43 @@ export class BooksService {
     user: IUserBody,
     files?: Express.Multer.File[],
   ) {
-    if (files) {
-      const uploadedImages = await Promise.all(
+    let uploadedImages: { url: string }[] = [];
+
+    if (files?.length) {
+      uploadedImages = await Promise.all(
         files.map(async (file) => {
           this.fileService.validateFile(file);
-          return this.fileService.uploadImage(file);
+          const result = await this.fileService.uploadImage(file);
+          if (!result || typeof result.url !== 'string') {
+            throw new BadRequestException('Image upload failed.');
+          }
+          return { url: result.url };
         }),
       ).catch(() => {
         throw new BadRequestException('Invalid file type.');
       });
-
-      const books = await this.bookModel.create({
-        ...updateBookDto,
-        images: uploadedImages.map((img) => img.url),
-        updated_by: user._id,
-      });
-
-      return books;
     }
 
-    const updateBook = await this.bookModel.updateOne(
-      { _id: id },
-      { ...updateBookDto, updated_by: user._id },
-    );
+    let existingImages = [];
 
-    return updateBook;
+    if (typeof updateBookDto.existing_images === 'string') {
+      existingImages = JSON.parse(updateBookDto.existing_images);
+    }
+
+    const finalImages = [
+      ...existingImages,
+      ...uploadedImages.map((img) => img.url),
+    ];
+
+    const updateData: any = {
+      ...updateBookDto,
+      images: finalImages,
+      updated_by: user._id,
+    };
+
+    delete updateData.existing_images;
+
+    return this.bookModel.updateOne({ _id: id }, updateData);
   }
 
   remove(id: string, user: IUserBody) {
@@ -182,10 +194,21 @@ export class BooksService {
     limit = 10,
   ) {
     if (isGetAll) {
-      return await this.bookModel.find({}).exec();
+      return await this.bookModel
+        .find({
+          $or: [{ isDeleted: false }, { isDeleted: { $exists: false } }],
+        })
+        .exec();
     }
 
     const pipeline: any[] = [];
+
+    pipeline.push({
+      $match: {
+        $or: [{ isDeleted: false }, { isDeleted: { $exists: false } }],
+      },
+    });
+
     const matchStage: any = {};
 
     if (categoryId) {
@@ -217,27 +240,6 @@ export class BooksService {
         $in: authorIds.map((id) => new Types.ObjectId(id)),
       };
     }
-
-    // Loại bỏ các sách đang flash sale khỏi list sách
-    // const now = new Date();
-
-    // const flashSale = await this.flashSaleModel
-    //   .findOne({
-    //     start_time: { $lte: now },
-    //     end_time: { $gte: now },
-    //   })
-    //   .populate('books.book_id') // Đảm bảo books có thông tin đầy đủ
-    //   .lean();
-
-    // const excludedBookIds =
-    //   flashSale?.books?.map((b) => b.book_id?._id?.toString()) || [];
-
-    // if (excludedBookIds.length > 0) {
-    //   matchStage._id = {
-    //     ...(matchStage._id || {}),
-    //     $nin: excludedBookIds.map((id) => new Types.ObjectId(id)),
-    //   };
-    // }
 
     if (Object.keys(matchStage).length > 0) {
       pipeline.push({ $match: matchStage });
@@ -312,27 +314,23 @@ export class BooksService {
     if (result.length > 0) {
       const { books, total, page: currentPage, limit: pageLimit } = result[0];
 
-      // Lấy thời điểm hiện tại
       const now = new Date();
-
-      // Tìm flash sale đang active
       const flashSale = await this.flashSaleModel
         .findOne({
           start_time: { $lte: now },
           end_time: { $gte: now },
         })
-        .populate('books.book_id') // Đảm bảo books có thông tin đầy đủ
+        .populate('books.book_id')
         .lean();
 
-      // Tạo map từ bookId → discount_price
       const flashSaleMap = new Map<string, number>();
       if (flashSale?.books?.length) {
         for (const item of flashSale.books) {
-          flashSaleMap.set(item.book_id._id.toString(), item.price);
+          console.log(item, 'check item');
+          flashSaleMap.set(item?.book_id?._id.toString(), item.price);
         }
       }
 
-      // Gắn giá flash sale vào sách nếu có
       const booksWithFlashSale = books.map((book) => {
         const bookId = book._id.toString();
         const discountPrice = flashSaleMap.get(bookId);
@@ -364,7 +362,6 @@ export class BooksService {
       };
     }
 
-    // Trường hợp không có kết quả
     return {
       books: [],
       pagination: {

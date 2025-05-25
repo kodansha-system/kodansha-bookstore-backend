@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Role } from 'src/roles/schemas/role.schema';
 import { Shop } from 'src/shops/schemas/shop.schema';
+import { StaffRole } from '../staffs.interface';
 
 export type StaffDocument = HydratedDocument<Staff>;
 
@@ -30,8 +31,12 @@ export class Staff {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Shop.name })
   shop_id: mongoose.Schema.Types.ObjectId;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Role.name })
-  role: mongoose.Schema.Types.ObjectId;
+  @Prop({
+    type: String,
+    enum: StaffRole,
+    required: true,
+  })
+  role: StaffRole;
 
   @Prop()
   refreshToken: string;

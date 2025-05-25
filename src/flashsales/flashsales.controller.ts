@@ -10,6 +10,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { FlashSaleService } from './flashsales.service';
 import { CreateFlashSaleDto } from './dto/create-flashsale.dto';
+import { Public } from 'src/decorator/customize';
 
 @ApiTags('flashsales')
 @Controller('flashsales')
@@ -26,6 +27,7 @@ export class FlashSaleController {
     return this.flashSaleService.findAll();
   }
 
+  @Public()
   @Get('active')
   findActive() {
     return this.flashSaleService.findActive();

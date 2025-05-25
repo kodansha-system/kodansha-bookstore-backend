@@ -9,6 +9,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
+import { ObjectId } from 'mongoose';
 import { VoucherType } from 'src/utils/enums';
 
 export class CreateVoucherDto {
@@ -46,4 +47,7 @@ export class CreateVoucherDto {
   @IsNumber()
   @Min(0)
   quantity: number;
+
+  @IsOptional()
+  applied_users: ObjectId[];
 }

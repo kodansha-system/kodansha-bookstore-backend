@@ -16,10 +16,12 @@ import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { MailerService } from '@nestjs-modules/mailer';
 import { I18nService } from 'nestjs-i18n';
+import { StaffsService } from 'src/staffs/staffs.service';
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private staffsService: StaffsService,
     private rolesService: RolesService,
     private jwtService: JwtService,
     private configService: ConfigService,
@@ -36,14 +38,25 @@ export class AuthService {
   async validateUser(username: string, pass: string): Promise<any> {
     const user = (await this.usersService.findOneByUsername(username)) as any;
     if (user) {
-      const isValid = this.usersService.isValidPassword(
-        pass,
-        user.toObject().password,
+      const isValid = this.usersService.isValidPassword(pass, user?.password);
+      if (isValid) {
+        const { password, ...result } = user?._doc;
+        return result;
+      }
+    }
+    return null;
+  }
+
+  async validateStaff(email: string, password: string) {
+    const staff = (await this.staffsService.findOneByStaffEmail(email)) as any;
+    if (staff) {
+      const isValid = this.staffsService.isValidPassword(
+        password,
+        staff.toObject().password,
       );
       if (isValid) {
-        const temp = await this.rolesService.findOne(user?.role?.id);
-        const { password, ...result } = user;
-        return { ...result, permissions: temp?.permissions };
+        const { password, ...result } = staff?._doc;
+        return result;
       }
     }
     return null;
@@ -51,15 +64,13 @@ export class AuthService {
 
   async login(user: any, response: Response) {
     try {
-      const { _id, email, name, role, permissions, type } = user;
+      const { _id, role, type } = user;
 
       const payload = {
         iss: 'from server',
         sub: 'token login',
         _id,
-        email,
-        name,
-        role,
+        role: role || 'user',
         type,
       };
 
@@ -76,14 +87,6 @@ export class AuthService {
 
       return {
         access_token: this.jwtService.sign(payload),
-        user: {
-          _id,
-          email,
-          name,
-          role,
-          permissions,
-          type,
-        },
       };
     } catch (error) {
       console.log(error);

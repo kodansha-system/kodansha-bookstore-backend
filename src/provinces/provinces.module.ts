@@ -4,6 +4,8 @@ import { ProvincesController } from './provinces.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Province, ProvinceSchema } from './schemas/province.schema';
 import { FilesService } from 'src/files/files.service';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
 
 @Module({
   imports: [

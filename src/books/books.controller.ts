@@ -35,6 +35,7 @@ export class BooksController {
     return this.booksService.create(createBookDto, user, files);
   }
 
+  @Public()
   @Get()
   async searchBooks(
     @Query('keyword') keyword: string,

@@ -23,11 +23,13 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Password không dc để trống' })
   password: string;
 
+  @IsOptional()
   @IsString()
   username: string;
 
   age: number;
 
+  @IsOptional()
   @IsString()
   gender: string;
 
@@ -42,10 +44,6 @@ export class CreateUserDto {
     province: string;
     is_default?: boolean;
   }[];
-
-  @IsNotEmpty({ message: 'Role không dc để trống' })
-  @IsMongoId()
-  role: mongoose.Schema.Types.ObjectId;
 }
 
 export class RegisterUserDto {

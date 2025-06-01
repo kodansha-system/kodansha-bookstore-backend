@@ -1,3 +1,4 @@
+import { populate } from 'dotenv';
 import {
   Controller,
   Get,
@@ -50,20 +51,22 @@ export class ShopBooksController {
     return this.shopBooksService.findOne(id);
   }
 
-  @Patch(':id')
-  @UseInterceptors(FileInterceptor('image'))
-  update(
-    @Param('id') id: string,
-    @Body() updateShopBookDto: UpdateShopBookDto,
+  @Patch('/:shop_id')
+  updateShopBook(
+    @Param('shop_id') shopId: string,
+    @Body() updateShopBookDto: UpdateShopBookDto[],
     @User() user: IUserBody,
-    @UploadedFile()
-    file: Express.Multer.File,
-  ) {
-    return this.shopBooksService.update(id, updateShopBookDto, user, file);
+  ): Promise<any> {
+    return this.shopBooksService.updateMany(shopId, updateShopBookDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string, @User() user: IUserBody) {
     return this.shopBooksService.remove(id, user);
+  }
+
+  @Get('/shop/:shop_id')
+  getBooksByShopId(@Param('shop_id') shopId: string) {
+    return this.shopBooksService.getBooksByShopId(shopId);
   }
 }

@@ -8,10 +8,10 @@ export class ShopBook {
   @Prop()
   quantity: number;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'ShopS' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Shop' })
   shop_id: mongoose.Types.ObjectId;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Books' })
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Book' })
   book_id: mongoose.Types.ObjectId;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })

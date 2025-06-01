@@ -1,4 +1,4 @@
-import { IsISO8601 } from 'class-validator';
+import { IsISO8601, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class DateRangeDto {
@@ -7,6 +7,7 @@ export class DateRangeDto {
     description: 'Ngày bắt đầu (ISO 8601)',
   })
   @IsISO8601()
+  @IsOptional()
   from: string;
 
   @ApiProperty({
@@ -14,5 +15,8 @@ export class DateRangeDto {
     description: 'Ngày kết thúc (ISO 8601)',
   })
   @IsISO8601()
+  @IsOptional()
   to: string;
+
+  categoryId: string;
 }

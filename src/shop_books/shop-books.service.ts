@@ -15,21 +15,21 @@ export class ShopBooksService {
   ) {}
 
   async create(createShopBookDto: CreateShopBookDto, user: IUserBody) {
-    const isExistShopBook = await this.shopBookModel.find({
-      book_id: createShopBookDto?.book_id,
-      shop_id: createShopBookDto?.shop_id,
-    });
+    // const isExistShopBook = await this.shopBookModel.find({
+    //   book_id: createShopBookDto?.book_id,
+    //   shop_id: createShopBookDto?.shop_id,
+    // });
 
-    if (!isExistShopBook) {
-      const shopBook = await this.shopBookModel.create({
-        ...createShopBookDto,
-        created_by: user._id,
-      });
+    // if (!isExistShopBook) {
+    //   const shopBook = await this.shopBookModel.create({
+    //     ...createShopBookDto,
+    //     created_by: user._id,
+    //   });
 
-      return {
-        shopBook,
-      };
-    }
+    //   return {
+    //     shopBook,
+    //   };
+    // }
 
     return new BadRequestException(
       'Sách đã tồn tại trong cửa hàng này rồi vui lòng cập nhật',
@@ -194,5 +194,31 @@ export class ShopBooksService {
         isDeleted: true,
       },
     );
+  }
+
+  async updateMany(shopId: string, updates: any) {
+    const bulkOps = updates?.data?.map((item) => ({
+      updateOne: {
+        filter: {
+          shop_id: shopId,
+          book_id: item.book_id,
+        },
+        update: {
+          $set: {
+            quantity: item.quantity,
+          },
+        },
+        upsert: true,
+      },
+    }));
+
+    return this.shopBookModel.bulkWrite(bulkOps);
+  }
+
+  async getBooksByShopId(shopId: string) {
+    return this.shopBookModel
+      .find({ shop_id: shopId })
+      .populate({ path: 'book_id', select: 'name' })
+      .exec();
   }
 }

@@ -17,3 +17,4 @@ export const ResponseMessage = (message: string) =>
 export const IS_SKIP_CHECK_PERMISSION = 'isSkipCheckPermission';
 export const SkipCheckPermission = () =>
   SetMetadata(IS_SKIP_CHECK_PERMISSION, true);
+export const Roles = (...roles: string[]) => SetMetadata('roles', roles);

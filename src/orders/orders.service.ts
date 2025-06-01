@@ -237,7 +237,7 @@ export class OrdersService {
       Array.isArray(createOrderDto.vouchers) &&
       createOrderDto.vouchers.length > 0
     ) {
-      const voucherIds = createOrderDto.vouchers.map(
+      const voucherIds = (createOrderDto?.vouchers ?? []).map(
         (id) => new Types.ObjectId(id.toString()),
       );
 
@@ -245,7 +245,7 @@ export class OrdersService {
         _id: { $in: voucherIds },
       });
 
-      if (vouchers.length !== voucherIds.length) {
+      if (createOrderDto?.vouchers && vouchers.length !== voucherIds.length) {
         throw new BadRequestException('Voucher không hợp lệ hoặc đã hết hạn');
       }
 
@@ -313,8 +313,6 @@ export class OrdersService {
         (id) => new Types.ObjectId(id.toString()),
       );
 
-      console.log('đơn hàng đây');
-      console.log(voucherIds, 'voucherIds');
       if (
         Array.isArray(createOrderDto.vouchers) &&
         createOrderDto.vouchers.length > 0
@@ -371,12 +369,10 @@ export class OrdersService {
       });
 
       // ✅ UPDATE VOUCHER QUANTITY
-      const voucherIds = createOrderDto.vouchers.map(
+      const voucherIds = (createOrderDto?.vouchers ?? []).map(
         (id) => new Types.ObjectId(id.toString()),
       );
 
-      console.log('đơn hàng đây');
-      console.log(voucherIds, 'voucherIds');
       if (
         Array.isArray(createOrderDto.vouchers) &&
         createOrderDto.vouchers.length > 0

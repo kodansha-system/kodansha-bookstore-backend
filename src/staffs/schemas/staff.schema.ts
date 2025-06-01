@@ -34,7 +34,7 @@ export class Staff {
   @Prop({
     type: String,
     enum: StaffRole,
-    required: true,
+    default: StaffRole.STAFF,
   })
   role: StaffRole;
 

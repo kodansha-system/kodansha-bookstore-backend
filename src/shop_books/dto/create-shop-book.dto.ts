@@ -1,12 +1,10 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsInt, IsMongoId, Min } from 'class-validator';
 
 export class CreateShopBookDto {
-  @IsNotEmpty()
-  quantity: number;
-
-  @IsNotEmpty()
-  shop_id: string;
-
-  @IsNotEmpty()
+  @IsMongoId()
   book_id: string;
+
+  @IsInt()
+  @Min(0)
+  quantity: number;
 }

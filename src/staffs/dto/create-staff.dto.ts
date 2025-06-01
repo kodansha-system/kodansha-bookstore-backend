@@ -33,6 +33,10 @@ export class CreateStaffDto {
   @IsArray()
   @IsOptional()
   address: string[];
+
+  @IsString()
+  @IsOptional()
+  phone_number: string;
 }
 
 export class RegisterStaffDto {

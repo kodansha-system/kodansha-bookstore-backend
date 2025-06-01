@@ -66,46 +66,53 @@ export class StaffsService {
   }
 
   async findAll(query) {
-    const { filter, sort, population, projection } = aqp(query);
+    const {
+      keyword,
+      current = 1,
+      pageSize = 10,
+      sort = { createdAt: -1 },
+    } = query;
 
-    const offset = (+filter?.current - 1) * filter?.pageSize;
-    const defaultLimit = +filter?.pageSize || 10;
+    const filter: Record<string, any> = {};
 
-    delete filter?.current;
-    delete filter?.pageSize;
+    if (keyword) {
+      const regex = { $regex: keyword, $options: 'i' };
+      filter.$or = [{ name: regex }, { email: regex }, { phone_number: regex }];
+    }
 
-    const totalItems = (await this.staffModel.find(filter)).length;
-    const totalPages = Math.ceil(totalItems / defaultLimit);
+    const offset = (+current - 1) * +pageSize;
 
-    const result = await this.staffModel
+    const totalItems = await this.staffModel.countDocuments(filter);
+    const totalPages = Math.ceil(totalItems / +pageSize);
+
+    const staffs = await this.staffModel
       .find(filter)
       .skip(offset)
-      .limit(defaultLimit)
-      .sort(sort as any)
-      .populate({
-        path: 'role',
-        select: 'name',
-      })
-      // .projection(projection)
+      .limit(+pageSize)
+      .sort(sort)
       .exec();
 
     return {
       meta: {
-        currentPage: filter?.current || 1,
-        pageSize: defaultLimit,
+        currentPage: +current,
+        pageSize: +pageSize,
         totalItems,
         totalPages,
       },
-      staffs: result,
+      staffs,
     };
   }
 
   findOne(id: string) {
-    return this.staffModel.findById(id).populate({
-      path: 'role',
-      select: { name: 1, permissions: 1 },
-      populate: { path: 'permissions', select: { name: 1 } },
-    });
+    return this.staffModel
+      .findById(id)
+      .populate({
+        path: 'role',
+        select: { name: 1, permissions: 1 },
+        populate: { path: 'permissions', select: { name: 1 } },
+      })
+      .select('-password')
+      .exec();
   }
 
   async findOneByStaffEmail(email: string) {

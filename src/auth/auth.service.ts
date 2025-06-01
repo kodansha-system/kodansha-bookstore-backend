@@ -93,6 +93,37 @@ export class AuthService {
     }
   }
 
+  async loginStaff(staff: any, response: Response) {
+    try {
+      const { _id, role, type } = staff;
+
+      const payload = {
+        iss: 'from server',
+        sub: 'token login',
+        _id,
+        role,
+        type,
+      };
+
+      const refresh_token = this.createRefreshToken(payload);
+
+      await this.usersService.updateUserToken(refresh_token, _id);
+
+      response.cookie('refresh_token', refresh_token, {
+        httpOnly: true,
+        maxAge: ms(this.configService.get<string>('REFRESH_TOKEN_EXPIRED')),
+        sameSite: 'lax',
+        secure: false,
+      });
+
+      return {
+        access_token: this.jwtService.sign(payload),
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async registerWithUsernameAndPassword(createUserDto: RegisterUserDto) {
     const { password, email } = createUserDto;
 

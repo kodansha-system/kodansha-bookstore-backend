@@ -47,7 +47,7 @@ export class AuthController {
   @UseGuards(LocalAuthStaffGuard)
   @ApiBody({ type: UserLoginDto })
   async loginStaff(@Request() req, @Res({ passthrough: true }) res) {
-    return this.authService.login(req.user, res);
+    return this.authService.loginStaff(req.user, res);
   }
 
   @Get('/profile')

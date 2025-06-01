@@ -9,7 +9,6 @@ import { DateRangeDto } from './dto/overview.dto';
 export class StatisticsController {
   constructor(private readonly statisticsService: StatisticsService) {}
 
-  @Public()
   @Get('overview')
   async getOverview(@Query() query: DateRangeDto) {
     return this.statisticsService.getOverview(query.from, query.to);
@@ -19,6 +18,16 @@ export class StatisticsController {
   @Public()
   async getTopBooks(@Query() query: DateRangeDto) {
     return this.statisticsService.getTopBooks(query.from, query.to);
+  }
+
+  @Get('top-books-by-category')
+  @Public()
+  async getTopBooksByCategoryId(@Query() query: DateRangeDto) {
+    return this.statisticsService.getTopBooks(
+      undefined,
+      undefined,
+      query.categoryId,
+    );
   }
 
   @Get('top-customers')

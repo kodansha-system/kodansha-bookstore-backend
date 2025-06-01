@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import mongoose from 'mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { Book, BookDocument } from 'src/books/schemas/book.schema';
 import { Order, OrderDocument } from 'src/orders/schemas/order.schema';
 import { User, UserDocument } from 'src/users/schemas/user.schema';
 import { OrderStatus } from 'src/utils/enums';
@@ -13,6 +15,9 @@ export class StatisticsService {
 
     @InjectModel(User.name)
     private readonly customerModel: SoftDeleteModel<UserDocument>,
+
+    @InjectModel(Book.name)
+    private readonly bookModel: SoftDeleteModel<BookDocument>,
   ) {}
 
   async getOverview(from: string, to: string) {
@@ -114,17 +119,19 @@ export class StatisticsService {
     };
   }
 
-  async getTopBooks(from: string, to: string) {
-    const fromDate = new Date(from);
-    const toDate = new Date(to);
+  async getTopBooks(from?: string, to?: string, categoryId?: string) {
+    const toDate = to ? new Date(to) : new Date();
+    const fromDate = from
+      ? new Date(from)
+      : new Date(new Date().setMonth(toDate.getMonth() - 6));
 
-    const topBooks = await this.orderModel.aggregate([
-      {
-        $match: {
-          createdAt: { $gte: fromDate, $lte: toDate },
-          order_status: OrderStatus.Completed,
-        },
-      },
+    const matchConditions: any = {
+      createdAt: { $gte: fromDate, $lte: toDate },
+      order_status: OrderStatus.Completed,
+    };
+
+    const pipeline: any[] = [
+      { $match: matchConditions },
       { $unwind: '$books' },
       {
         $group: {
@@ -141,16 +148,52 @@ export class StatisticsService {
         },
       },
       { $unwind: '$bookInfo' },
+    ];
+
+    if (categoryId) {
+      pipeline.push({
+        $match: {
+          'bookInfo.category_id': new mongoose.Types.ObjectId(categoryId),
+        },
+      });
+    }
+
+    pipeline.push(
       {
         $project: {
-          _id: 0,
+          _id: 1,
           bookName: '$bookInfo.name',
+          price: '$bookInfo.price',
+          images: '$bookInfo.images',
+          rating: '$bookInfo.rating.average',
           totalSold: 1,
         },
       },
+      {
+        $match: { 'bookInfo.isDeleted': false },
+      },
       { $sort: { totalSold: -1 } },
       { $limit: 10 },
-    ]);
+    );
+
+    const topBooks = await this.orderModel.aggregate(pipeline);
+
+    console.log(topBooks);
+
+    if (topBooks.length === 0) {
+      const fallbackBooks = await this.bookModel
+        .find(categoryId ? { category_id: categoryId } : {}, { name: 1 })
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .lean();
+
+      console.log(fallbackBooks, 'fallbackbook');
+
+      return fallbackBooks.map((book) => ({
+        bookName: book.name,
+        totalSold: 0,
+      }));
+    }
 
     return topBooks;
   }

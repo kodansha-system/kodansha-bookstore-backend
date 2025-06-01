@@ -34,7 +34,7 @@ import { StaffsModule } from 'src/staffs/staffs.module';
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
         signOptions: {
-          expiresIn: ms(configService.get('JWT_EXPIRED')),
+          expiresIn: configService.get('JWT_EXPIRED'),
         },
       }),
       inject: [ConfigService],

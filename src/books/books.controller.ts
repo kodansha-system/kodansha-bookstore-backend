@@ -10,20 +10,24 @@ import {
   UploadedFile,
   Patch,
   UploadedFiles,
+  UseGuards,
 } from '@nestjs/common';
-import { Public, ResponseMessage, User } from 'src/decorator/customize';
+import { Public, ResponseMessage, Roles, User } from 'src/decorator/customize';
 import { IUserBody } from 'src/users/users.interface';
 import { ApiTags } from '@nestjs/swagger';
 import { BooksService } from './books.service';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
+import { RolesGuard } from 'src/auth/roles.guard';
 
 @ApiTags('books')
 @Controller('books')
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
+  @UseGuards(RolesGuard)
+  @Roles('admin')
   @Post()
   @UseInterceptors(FilesInterceptor('images'))
   create(

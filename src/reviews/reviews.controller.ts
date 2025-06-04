@@ -66,6 +66,15 @@ export class ReviewsController {
     return this.reviewsService.update(id, updateReviewDto, user, file);
   }
 
+  @Post(':id/reply')
+  async replyToReview(
+    @Param('id') id: string,
+    @Body('content') content: string,
+    @User() staff: IUserBody,
+  ) {
+    return this.reviewsService.replyReview(id, content, staff);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string, @User() user: IUserBody) {
     return this.reviewsService.remove(id, user);

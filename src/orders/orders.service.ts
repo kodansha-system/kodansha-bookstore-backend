@@ -213,7 +213,6 @@ export class OrdersService {
   }
 
   async create(createOrderDto: CreateOrderDto, user: IUserBody) {
-    console.log(createOrderDto?.vouchers, 'check data order');
     const delivery_method = createOrderDto.delivery_method;
     const payment_method = createOrderDto.payment_method;
     const payment_expire_at = new Date(Date.now() + 5 * 60 * 1000);
@@ -308,10 +307,13 @@ export class OrdersService {
         ...(paymentResponse && { payment_link: paymentResponse?.checkoutUrl }),
       });
 
+      let voucherIds;
       // ✅ UPDATE VOUCHER QUANTITY
-      const voucherIds = createOrderDto.vouchers.map(
-        (id) => new Types.ObjectId(id.toString()),
-      );
+      if (createOrderDto.vouchers && createOrderDto.vouchers?.length > 0) {
+        voucherIds = createOrderDto.vouchers.map(
+          (id) => new Types.ObjectId(id.toString()),
+        );
+      }
 
       if (
         Array.isArray(createOrderDto.vouchers) &&
@@ -441,7 +443,7 @@ export class OrdersService {
       },
       {
         path: 'user_id',
-        select: { name: 1 },
+        select: { name: 1, phone_number: 1, email: 1 },
       },
     ]);
   }
@@ -542,7 +544,10 @@ export class OrdersService {
       }
 
       if (!statusExists && order.order_status < status) {
-        if (status === OrderStatus.Verified) {
+        if (
+          status === OrderStatus.Verified &&
+          order.delivery_method === DeliveryMethod.HOME_DELIVERY
+        ) {
           await this.createGoshipShipment(order);
         }
 

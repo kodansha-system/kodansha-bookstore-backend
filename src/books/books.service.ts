@@ -285,7 +285,7 @@ export class BooksService {
       sortStage.price = 1;
     } else if (sortPrice === 'desc') {
       sortStage.price = -1;
-    }
+    } else sortStage.total_sold = -1;
 
     if (Object.keys(sortStage).length > 0) {
       pipeline.push({ $sort: sortStage });

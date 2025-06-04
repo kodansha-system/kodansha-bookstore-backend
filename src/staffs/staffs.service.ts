@@ -28,7 +28,13 @@ export class StaffsService {
     created_by: IStaff,
     file?: Express.Multer.File,
   ) {
-    const { password } = createStaffDto;
+    const { password, email } = createStaffDto;
+
+    const isEmailExist = await this.staffModel.findOne({ email });
+    if (isEmailExist) {
+      throw new BadRequestException('Email đã tồn tại.');
+    }
+
     const hashPassword = this.getHashPassword(password);
 
     if (file) {

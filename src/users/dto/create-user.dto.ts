@@ -63,8 +63,6 @@ export class RegisterUserDto {
 
   address: string;
 
-  role: string;
-
   type: AccType;
 }
 

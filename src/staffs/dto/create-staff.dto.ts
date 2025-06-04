@@ -37,6 +37,9 @@ export class CreateStaffDto {
   @IsString()
   @IsOptional()
   phone_number: string;
+
+  @IsMongoId()
+  shop_id: mongoose.Schema.Types.ObjectId;
 }
 
 export class RegisterStaffDto {
@@ -59,17 +62,7 @@ export class RegisterStaffDto {
   role: string;
 
   type: AccType;
-}
 
-export class RegisterFacebookStaffDto {
-  @IsNotEmpty({ message: 'Name không dc để trống' })
-  name: string;
-
-  @IsEmail()
-  email: string;
-
-  @IsNotEmpty({ message: 'FacebookId không dc để trống' })
-  facebook_id: string;
-
-  type: AccType;
+  @IsMongoId()
+  shop_id: mongoose.Schema.Types.ObjectId;
 }

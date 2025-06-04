@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
@@ -140,8 +141,6 @@ export class ReviewsService {
       },
     );
 
-    console.log(modifiedBook);
-
     return {
       review,
     };
@@ -167,7 +166,16 @@ export class ReviewsService {
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
-      .populate({ path: 'created_by', select: 'image name' })
+      .populate([
+        {
+          path: 'reply.staff_id',
+          select: 'name',
+        },
+        {
+          path: 'created_by',
+          select: 'name image',
+        },
+      ])
       .select(projection)
       .sort((sort as any) || '-createdAt')
       .exec();
@@ -184,24 +192,10 @@ export class ReviewsService {
   }
 
   async findOne(id: string) {
-    return await this.reviewModel.findById(id).populate([
-      {
-        path: 'created_by',
-        select: '_id name role',
-        populate: {
-          path: 'role',
-          select: 'name',
-        },
-      },
-      {
-        path: 'updated_by',
-        select: '_id name role',
-        populate: {
-          path: 'role',
-          select: 'name',
-        },
-      },
-    ]);
+    return await this.reviewModel.findById(id).populate({
+      path: 'reply.staff_id',
+      select: 'name',
+    });
   }
 
   async verifiedReview(id: string, isVerified: boolean) {
@@ -239,6 +233,20 @@ export class ReviewsService {
     );
 
     return updateReview;
+  }
+
+  async replyReview(id: string, content: string, user: IUserBody) {
+    const review = await this.reviewModel.findById(id);
+    if (!review) throw new NotFoundException('Review không tồn tại');
+
+    review.reply = {
+      content,
+      created_at: new Date(),
+      staff_id: new Types.ObjectId(user._id),
+    };
+
+    await review.save();
+    return { message: 'Đã hồi đáp review thành công' };
   }
 
   remove(id: string, user: IUserBody) {

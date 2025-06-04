@@ -162,15 +162,12 @@ export class StatisticsService {
       {
         $project: {
           _id: 1,
-          bookName: '$bookInfo.name',
+          name: '$bookInfo.name',
           price: '$bookInfo.price',
           images: '$bookInfo.images',
           rating: '$bookInfo.rating.average',
           totalSold: 1,
         },
-      },
-      {
-        $match: { 'bookInfo.isDeleted': false },
       },
       { $sort: { totalSold: -1 } },
       { $limit: 10 },

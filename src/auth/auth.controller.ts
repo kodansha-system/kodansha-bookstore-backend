@@ -21,6 +21,7 @@ import { UserLoginDto } from './dto/login.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from 'src/users/users.service';
 import { I18nService } from 'nestjs-i18n';
+import { StaffsService } from 'src/staffs/staffs.service';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -29,6 +30,7 @@ export class AuthController {
     private authService: AuthService,
     private roleService: RolesService,
     private usersService: UsersService,
+    private staffsService: StaffsService,
     private readonly i18n: I18nService,
   ) {}
 
@@ -54,6 +56,12 @@ export class AuthController {
   async getProfile(@Request() req) {
     const infor = await this.usersService.getUserInfor(req?.user?._id);
     return { ...req.user, ...infor };
+  }
+
+  @Get('/staff-profile')
+  async getStaffProfile(@Request() req) {
+    const infor: any = await this.staffsService.findOne(req?.user?._id);
+    return infor?._doc;
   }
 
   @ResponseMessage('Register a user')

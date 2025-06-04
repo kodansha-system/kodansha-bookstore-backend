@@ -130,7 +130,7 @@ export class AuthService {
     const isExisted = await this.userModel.findOne({ email });
 
     if (isExisted) {
-      throw new BadRequestException('Email is existed');
+      throw new BadRequestException('Email đã tồn tại');
     }
 
     const defaultRole = await this.roleModel.findOne({ name: USER_ROLE });

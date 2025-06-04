@@ -23,6 +23,20 @@ export class Review {
   @Prop()
   is_verified: boolean;
 
+  @Prop({
+    type: {
+      content: String,
+      created_at: Date,
+      staff_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Staff' },
+    },
+    default: null,
+  })
+  reply: {
+    content: string;
+    created_at: Date;
+    staff_id: mongoose.Types.ObjectId;
+  };
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
   created_by: mongoose.Schema.Types.ObjectId;
 

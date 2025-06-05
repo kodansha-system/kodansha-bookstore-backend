@@ -43,6 +43,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { PayosWebhookModule } from './payos-webhook/payos-webhook.module';
 import { StatisticsModule } from './statistics/statistic.module';
 import { CommentModule } from './comments/comments.module';
+import { QuestionsModule } from './questions/questions.module';
 @Module({
   imports: [
     MongooseModule.forRootAsync({
@@ -126,6 +127,8 @@ import { CommentModule } from './comments/comments.module';
     StatisticsModule,
 
     CommentModule,
+
+    QuestionsModule,
 
     ScheduleModule.forRoot(),
 

@@ -190,6 +190,7 @@ export class BooksService {
     sortPrice?: 'asc' | 'desc',
     ratingGte?: number,
     isGetAll?: boolean,
+    isFlashSale?: boolean,
     page = 1,
     limit = 10,
   ) {
@@ -203,6 +204,7 @@ export class BooksService {
 
     const pipeline: any[] = [];
 
+    // Match đầu tiên: lọc sách chưa xoá
     pipeline.push({
       $match: {
         $or: [{ isDeleted: false }, { isDeleted: { $exists: false } }],
@@ -211,30 +213,29 @@ export class BooksService {
 
     const matchStage: any = {};
 
+    // Lọc theo danh mục
     if (categoryId) {
-      let categoryIds: string[];
-      if (typeof categoryId === 'string') {
-        categoryIds = categoryId.split(',').map((id) => id.trim());
-      } else {
-        categoryIds = categoryId;
-      }
+      const categoryIds: string[] =
+        typeof categoryId === 'string'
+          ? categoryId.split(',').map((id) => id.trim())
+          : categoryId;
 
       matchStage.category_id = {
         $in: categoryIds.map((id) => new Types.ObjectId(id)),
       };
     }
 
+    // Lọc theo rating
     if (ratingGte !== undefined) {
       matchStage.rating_average = { $gte: ratingGte };
     }
 
+    // Lọc theo tác giả
     if (authorId) {
-      let authorIds: string[];
-      if (typeof authorId === 'string') {
-        authorIds = authorId.split(',').map((id) => id.trim());
-      } else {
-        authorIds = authorId;
-      }
+      const authorIds: string[] =
+        typeof authorId === 'string'
+          ? authorId.split(',').map((id) => id.trim())
+          : authorId;
 
       matchStage.authors = {
         $in: authorIds.map((id) => new Types.ObjectId(id)),
@@ -245,6 +246,7 @@ export class BooksService {
       pipeline.push({ $match: matchStage });
     }
 
+    // Join tác giả
     pipeline.push({
       $lookup: {
         from: 'authors',
@@ -254,6 +256,7 @@ export class BooksService {
       },
     });
 
+    // Join danh mục
     pipeline.push({
       $lookup: {
         from: 'categories',
@@ -263,34 +266,83 @@ export class BooksService {
       },
     });
 
+    pipeline.push({ $unwind: '$category' });
+
+    // Join với flash sale để biết sách nào đang flash
     pipeline.push({
-      $unwind: '$category',
+      $lookup: {
+        from: 'flashsales',
+        let: { bookId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $lte: ['$start_time', new Date()] },
+                  { $gte: ['$end_time', new Date()] },
+                  {
+                    $in: [
+                      '$$bookId',
+                      {
+                        $map: {
+                          input: '$books',
+                          as: 'b',
+                          in: '$$b.book_id',
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+            },
+          },
+          { $project: { books: 1, end_time: 1 } },
+        ],
+        as: 'flashSaleDetails',
+      },
     });
 
-    if (keyword) {
-      const searchPattern = keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    // Gắn cờ flash sale
+    pipeline.push({
+      $addFields: {
+        is_flash_sale: {
+          $gt: [{ $size: '$flashSaleDetails' }, 0],
+        },
+      },
+    });
 
+    // Nếu người dùng chỉ muốn sách đang flash sale
+    if (isFlashSale === true) {
       pipeline.push({
         $match: {
-          name: {
-            $regex: searchPattern,
-            $options: 'i',
-          },
+          is_flash_sale: true,
         },
       });
     }
 
+    // Lọc theo keyword
+    if (keyword) {
+      const searchPattern = keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      pipeline.push({
+        $match: {
+          name: { $regex: searchPattern, $options: 'i' },
+        },
+      });
+    }
+
+    // Sắp xếp
     const sortStage: any = {};
     if (sortPrice === 'asc') {
       sortStage.price = 1;
     } else if (sortPrice === 'desc') {
       sortStage.price = -1;
-    } else sortStage.total_sold = -1;
-
-    if (Object.keys(sortStage).length > 0) {
-      pipeline.push({ $sort: sortStage });
+    } else {
+      sortStage.total_sold = -1;
     }
 
+    pipeline.push({ $sort: sortStage });
+
+    // Phân trang
     const paginatedPipeline = [
       ...pipeline,
       {
@@ -323,27 +375,33 @@ export class BooksService {
         .populate('books.book_id')
         .lean();
 
-      const flashSaleMap = new Map<string, number>();
+      const flashSaleMap = new Map<string, { price: number; endsAt: Date }>();
       if (flashSale?.books?.length) {
         for (const item of flashSale.books) {
-          console.log(item, 'check item');
-          flashSaleMap.set(item?.book_id?._id.toString(), item.price);
+          if (item.book_id?._id) {
+            flashSaleMap.set(item.book_id._id.toString(), {
+              price: item.price,
+              endsAt: flashSale.end_time,
+            });
+          }
         }
       }
 
       const booksWithFlashSale = books.map((book) => {
         const bookId = book._id.toString();
-        const discountPrice = flashSaleMap.get(bookId);
-        if (discountPrice !== undefined) {
+        const flashInfo = flashSaleMap.get(bookId);
+
+        if (flashInfo) {
           return {
             id: bookId,
             ...book,
             original_price: book.price,
-            price: discountPrice,
+            price: flashInfo.price,
             is_flash_sale: true,
-            flash_sale_ends_at: flashSale.end_time,
+            flash_sale_ends_at: flashInfo.endsAt,
           };
         }
+
         return {
           id: bookId,
           ...book,

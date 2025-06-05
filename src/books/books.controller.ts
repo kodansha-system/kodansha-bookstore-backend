@@ -48,6 +48,7 @@ export class BooksController {
     @Query('sortPrice') sortPrice: 'asc' | 'desc',
     @Query('ratingGte') ratingGte: string,
     @Query('get_all') isGetAll: boolean,
+    @Query('is_flash_sale') isFlashSale: boolean,
     @Query('page') page: string,
     @Query('limit') limit: string,
   ) {
@@ -58,6 +59,7 @@ export class BooksController {
       sortPrice,
       ratingGte ? parseFloat(ratingGte) : undefined,
       isGetAll,
+      isFlashSale,
       +page ? parseInt(page) : 1,
       +limit ? parseInt(limit) : 10,
     );
